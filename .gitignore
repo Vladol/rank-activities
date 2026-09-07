@@ -1,0 +1,27 @@
+# compiled output
+/dist
+/node_modules
+*.tsbuildinfo
+
+# generated GraphQL SDL (code-first)
+/src/schema.gql
+
+# logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# tests / coverage
+/coverage
+
+# editors & OS
+.idea
+.vscode
+.DS_Store
+
+# env
+.env
+.env.local
