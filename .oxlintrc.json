@@ -5,7 +5,26 @@
     "suspicious": "warn"
   },
   "rules": {
-    "typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }]
+    "typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }],
+    "import/no-cycle": "error"
   },
+  "overrides": [
+    {
+      "files": ["src/domain/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@nestjs/*", "**/modules/**", "**/infrastructure/**", "**/adapters/**"],
+                "message": "src/domain is the pure core: no Nest, no I/O, no infrastructure (docs/development-flow/flow.md, section 4.3). Dependency arrows point inward only."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
   "ignorePatterns": ["dist", "node_modules"]
 }

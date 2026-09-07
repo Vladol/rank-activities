@@ -13,6 +13,8 @@
     "incremental": true,
     "skipLibCheck": true,
     "strict": true,
+    // Open-Meteo hourly series routinely contain null: indexing guarantees nothing.
+    "noUncheckedIndexedAccess": true,
     "strictPropertyInitialization": false,
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,

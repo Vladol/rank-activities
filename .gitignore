@@ -1,6 +1,7 @@
 # compiled output
 /dist
 /node_modules
+/docs
 *.tsbuildinfo
 
 # generated GraphQL SDL (code-first)
@@ -25,3 +26,6 @@ yarn-error.log*
 # env
 .env
 .env.local
+
+# Claude: personal overrides only (settings and hooks themselves are committed)
+.claude/settings.local.json

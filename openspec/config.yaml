@@ -1,0 +1,58 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
+
+context: |
+  A service that ranks activities (ski / surfing / outdoor sightseeing /
+  indoor sightseeing) against the weather forecast from the Open-Meteo API.
+
+  Stack: NestJS 12, GraphQL code-first (Apollo Server 5), TypeScript strict,
+  vitest, oxlint, Drizzle + PostgreSQL.
+
+  Key principles (docs/development-flow/flow.md):
+  - An activity is data (a JSON declaration), not code. A new activity needs no release.
+  - Three honest result states: Ranked | NotApplicable | NoData. Never score=0 in place of a refusal.
+  - Hexagonal architecture: src/domain is the pure core, no Nest and no I/O.
+  - External responses are validated with zod at the adapter boundary.
+  - Responses are explainable: score + per-feature breakdown + scoring profile version.
+
+rules:
+  proposal:
+    - Write in English.
+  spec:
+    - Write in English.
+    - State each requirement as "The service SHALL ...".
+  tasks:
+    - Write in English.
+  design:
+    - Write in English.
+    - Name the alternative considered and why it was rejected.
