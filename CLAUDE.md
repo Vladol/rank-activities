@@ -4,12 +4,17 @@ A service that ranks activities (**ski / surfing / outdoor sightseeing / indoor
 sightseeing**) against the weather forecast from the Open-Meteo API.
 
 Full development plan: [docs/development-flow/flow.md](docs/development-flow/flow.md).
-Stage 1 status: [docs/development-flow/stage-one.md](docs/development-flow/stage-one.md).
+Per-stage deep dives are linked from the table at the top of that file
+(stages 1-6 are written; stage 5 fixes the scoring parameters and their contracts,
+stage 6 the stack, the data flow and the bottlenecks).
 
 ## Stack
 
 NestJS 12 · GraphQL code-first (Apollo Server 5) · TypeScript strict · zod ·
-vitest · oxlint · Drizzle + PostgreSQL (arrives in stage 6).
+vitest · oxlint. Chosen in stage 6, installed with their first consumer: `undici`,
+`cockatiel`, `lru-cache`, Drizzle + PostgreSQL (`pg`), `nestjs-pino`, `prom-client`.
+Deliberately **not** in v1: `luxon` (deferred with the timezone debt), `dataloader`
+(no multi-location), `@nestjs/cache-manager` (we own the cache port).
 
 ## Commands
 
@@ -60,9 +65,15 @@ Two frameworks must not compete. The split:
 Chain: `/opsx:explore` → `superpowers:brainstorming` → `/opsx:propose` →
 `tasks.md` → TDD → `/code-review` → `/opsx:archive`.
 
-**Open a change proposal only** for the initial domain spec and for the three axes
-of change (new activity / swapping the weather provider / changing the scoring).
-Typos, refactors and dependency bumps are ordinary commits with no spec.
+**Open a change proposal** for a new observable capability of the service and for the
+three axes of change (new activity / swapping the weather provider / changing the
+scoring). Typos, refactors and dependency bumps are ordinary commits with no spec.
+
+Nine capabilities exist; the roadmap and the implementation queue are in
+[stage-four.md §15](docs/development-flow/stage-four.md). **The number is the order the
+spec was written, not the order to build in** — `07` (caching) has to land before `05`
+is finished, and `08` (persistence) before `04` is, because each of those two specs
+requires behaviour whose mechanism arrives later.
 
 ## Layout
 

@@ -48,7 +48,7 @@ context: |
 rules:
   proposal:
     - Write in English.
-  spec:
+  specs:
     - Write in English.
     - State each requirement as "The service SHALL ...".
   tasks:
