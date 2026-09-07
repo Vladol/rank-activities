@@ -5,12 +5,27 @@ import { z } from 'zod';
  * process immediately rather than surfacing `undefined` at runtime
  * (docs/development-flow/flow.md, section 6.1).
  */
+const weatherSource = z.enum(['open-meteo', 'mock', 'record']);
+
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().max(65535).default(3000),
 
-  /** Weather source. `mock` runs on fixtures, with no network access. */
-  WEATHER_PROVIDER: z.enum(['open-meteo', 'mock', 'record']).default('mock'),
+  /**
+   * Default weather source for every capability. `mock` runs on fixtures, with
+   * no network access. A source that is named here but not implemented refuses
+   * the start; nothing is ever substituted for it.
+   */
+  WEATHER_PROVIDER: weatherSource.default('mock'),
+
+  /**
+   * Per-capability overrides. Forecast, marine and archive are separate seams,
+   * so each may be pointed at a different vendor without a code change
+   * (`weather-sources`, "The active source is chosen explicitly").
+   */
+  WEATHER_FORECAST_SOURCE: weatherSource.optional(),
+  WEATHER_MARINE_SOURCE: weatherSource.optional(),
+  WEATHER_ARCHIVE_SOURCE: weatherSource.optional(),
 
   /** Default forecast horizon: past 7 days the ranking degrades into noise. */
   FORECAST_DAYS_DEFAULT: z.coerce.number().int().min(1).max(16).default(7),

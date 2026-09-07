@@ -22,6 +22,13 @@ import { HealthModule } from './modules/health/health.module';
       graphiql: process.env.NODE_ENV !== 'production',
     }),
     HealthModule,
+    // WeatherModule is deliberately not imported yet. It binds a source per
+    // capability and refuses to start when the configured source has no
+    // implementation — and this change ships the contract, not a source, so
+    // importing it here would make every start fail. It is wired in
+    // `02-add-mock-weather-provider`, which registers the recorded sources
+    // (task 7.1 there). Until then the binding is covered by
+    // src/modules/weather/weather.module.spec.ts.
   ],
   providers: [AppResolver, AppService],
 })
