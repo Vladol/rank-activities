@@ -80,6 +80,13 @@ export function coordinateKey(latitude: number, longitude: number): string {
 }
 
 /**
+ * The same rounding as `roundToGrid` in `domain/shared/coordinates.ts`, and
+ * deliberately not imported from it: `scripts/record-fixture.ts` loads this
+ * module under Node's own type stripping, which resolves a relative import
+ * only with an explicit `.ts` extension — and that extension would not survive
+ * the Nest build. `coordinates.spec.ts` pins the two together so they cannot
+ * drift apart silently.
+ *
  * Two decimals, with the negative zero folded away: `-0`, and every coordinate
  * between -0.005 and 0, format as `-0.00`, which would address a second
  * fixture at a point that is the same place.

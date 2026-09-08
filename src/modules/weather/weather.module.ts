@@ -27,6 +27,17 @@ import {
 const BOUND_SOURCES = Symbol('BoundSources');
 
 /**
+ * One dynamic module per configuration.
+ *
+ * Nest identifies a dynamic module by the object `forRoot` returned, so two
+ * callers asking for the same configuration would otherwise get two modules:
+ * two sets of ports, the binding log printed twice, and a root that configured
+ * a source silently ignored by the second importer. Every module that needs a
+ * weather port imports `WeatherModule.forRoot()`, so this has to hold.
+ */
+const built = new Map<SourceRegistry, Map<PlaceLookupRegistry, DynamicModule>>();
+
+/**
  * Chooses a source per capability from configuration, reports the choice and
  * refuses to start when a configured source has no implementation. That is a
  * property of the seam rather than of any one source, which is why it lives
@@ -39,6 +50,13 @@ export class WeatherModule {
     registry: SourceRegistry = IMPLEMENTED_SOURCES,
     lookups: PlaceLookupRegistry = IMPLEMENTED_PLACE_LOOKUPS,
   ): DynamicModule {
+    const forRegistry = built.get(registry) ?? new Map<PlaceLookupRegistry, DynamicModule>();
+    const cached = forRegistry.get(lookups);
+
+    if (cached !== undefined) {
+      return cached;
+    }
+
     const bound: Provider = {
       provide: BOUND_SOURCES,
       inject: [ConfigService],
@@ -107,7 +125,7 @@ export class WeatherModule {
       useFactory: (sources: BoundSources) => new SourceRouterService(sources.ports),
     };
 
-    return {
+    const module: DynamicModule = {
       module: WeatherModule,
       providers: [bound, ...capabilityPorts, placeLookup, router, MetricPlannerService],
       exports: [
@@ -117,6 +135,11 @@ export class WeatherModule {
         MetricPlannerService,
       ],
     };
+
+    forRegistry.set(lookups, module);
+    built.set(registry, forRegistry);
+
+    return module;
   }
 }
 

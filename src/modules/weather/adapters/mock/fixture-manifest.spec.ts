@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { roundToGrid } from '../../../../domain/shared/coordinates';
 import { compareKeys, coordinateKey, keyPaths, normaliseQuery } from './fixture-manifest';
 
 describe('the fixture address', () => {
@@ -48,5 +49,16 @@ describe('the key-set comparison that guards a re-recording', () => {
       appeared: [],
       vanished: [],
     });
+  });
+});
+
+describe('the fixture address and the location identity', () => {
+  it('round a coordinate the same way, in two modules that cannot import each other', () => {
+    // `fixture-manifest.ts` carries its own copy of the rounding: the fixture
+    // recorder loads it under Node's type stripping, which cannot follow an
+    // extensionless import. The copy is only safe while this holds.
+    for (const value of [46.204391, -0.0031, -0, 0, -9.1333, 168.6626, -45.0312, 89.999]) {
+      expect(coordinateKey(value, value)).toBe(`${roundToGrid(value)}:${roundToGrid(value)}`);
+    }
   });
 });

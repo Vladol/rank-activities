@@ -1,3 +1,4 @@
+import type { Coordinates } from '../../../domain/shared/coordinates';
 import type { DomainError } from '../../../domain/shared/domain-error';
 import type { WeatherErrorCode } from '../../../domain/shared/domain-error';
 import type { Capability, MetricCode } from '../../../domain/weather/metric';
@@ -30,10 +31,8 @@ export type PortErrorCode = WeatherErrorCode | RequestErrorCode;
  */
 export type WeatherError = DomainError<PortErrorCode>;
 
-export interface Coordinates {
-  readonly latitude: number;
-  readonly longitude: number;
-}
+/** Re-exported so a port's signature reads without reaching into the core. */
+export type { Coordinates } from '../../../domain/shared/coordinates';
 
 /**
  * How far the request reaches. A rolling forecast window and an explicit date

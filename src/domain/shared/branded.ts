@@ -23,6 +23,14 @@ export type Weight = Brand<number, 'Weight'>;
 export type FeatureId = Brand<string, 'FeatureId'>;
 
 /**
+ * The identity of a place, derived from its rounded coordinates rather than
+ * issued by a store (`domain/shared/coordinates.ts`). It is a `string` and a
+ * source's own place id is a `string`; only the brand keeps the vendor's
+ * identifier from being passed where ours is expected.
+ */
+export type LocationId = Brand<string, 'LocationId'>;
+
+/**
  * The only way into `Score01`. Clamping is unconditional: an unclamped
  * normaliser is not a different curve, it is a source of scores outside [0, 1]
  * that break the breakdown invariant (stage-five.md, section 2).

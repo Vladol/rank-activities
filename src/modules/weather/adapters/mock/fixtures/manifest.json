@@ -49,6 +49,282 @@
       "note": "Deep winter; also the null-policy fixture (ERA5 has no visibility or freezing_level_height)"
     },
     {
+      "name": "climate-chamonix-january",
+      "file": "climate-chamonix-january.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=45.9237&longitude=6.8694&start_date=2025-01-01&end_date=2025-01-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 833,
+      "sha256": "2c337488ff75fbca4cc41ab495e2b870f3606cb2bb8dde03145662cad9115361",
+      "location": {
+        "latitude": 45.9237,
+        "longitude": 6.8694
+      },
+      "window": {
+        "startDate": "2025-01-01",
+        "endDate": "2025-01-31"
+      },
+      "note": "Cold season, northern candidate window: the alpine location that has a season (stage-three.md 5.2)"
+    },
+    {
+      "name": "climate-chamonix-july",
+      "file": "climate-chamonix-july.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=45.9237&longitude=6.8694&start_date=2025-07-01&end_date=2025-07-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 831,
+      "sha256": "893b5917b1b1ce8393835bdadf42f97d28121ffa884689d04df7b682c9d172d8",
+      "location": {
+        "latitude": 45.9237,
+        "longitude": 6.8694
+      },
+      "window": {
+        "startDate": "2025-07-01",
+        "endDate": "2025-07-31"
+      },
+      "note": "The southern candidate window, probed for a northern location too: nothing is assumed from the sign of the latitude"
+    },
+    {
+      "name": "climate-lisbon-january",
+      "file": "climate-lisbon-january.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=38.7167&longitude=-9.1333&start_date=2025-01-01&end_date=2025-01-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 831,
+      "sha256": "67d8693db2ba92b44e122d62500816977e5e1feb67d612b2abcb7ecd136fb3e5",
+      "location": {
+        "latitude": 38.7167,
+        "longitude": -9.1333
+      },
+      "window": {
+        "startDate": "2025-01-01",
+        "endDate": "2025-01-31"
+      },
+      "note": "Mediterranean coastal: no cold-season snowfall at all (stage-three.md 5.2, 0.0 cm)"
+    },
+    {
+      "name": "climate-lisbon-july",
+      "file": "climate-lisbon-july.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=38.7167&longitude=-9.1333&start_date=2025-07-01&end_date=2025-07-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 830,
+      "sha256": "456fc8a40f805b3a5a519755b95d844135d0872ebd76891e0eeb28bebf4e3d82",
+      "location": {
+        "latitude": 38.7167,
+        "longitude": -9.1333
+      },
+      "window": {
+        "startDate": "2025-07-01",
+        "endDate": "2025-07-31"
+      },
+      "note": "The other candidate window for Lisbon"
+    },
+    {
+      "name": "climate-perisher-january",
+      "file": "climate-perisher-january.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-36.4050&longitude=148.4085&start_date=2025-01-01&end_date=2025-01-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 840,
+      "sha256": "91463e01e888bdb8e47c9d0d78f72bf84db9718bbecacd40facb326793f6d19e",
+      "location": {
+        "latitude": -36.405,
+        "longitude": 148.4085
+      },
+      "window": {
+        "startDate": "2025-01-01",
+        "endDate": "2025-01-31"
+      },
+      "note": "Southern hemisphere, warm window: the month a northern rule would call cold"
+    },
+    {
+      "name": "climate-perisher-july",
+      "file": "climate-perisher-july.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-36.4050&longitude=148.4085&start_date=2025-07-01&end_date=2025-07-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 847,
+      "sha256": "ebf360d6059b5ddf83d6cc4d5b9c37cce0749f5e19446407145dc99d173965e4",
+      "location": {
+        "latitude": -36.405,
+        "longitude": 148.4085
+      },
+      "window": {
+        "startDate": "2025-07-01",
+        "endDate": "2025-07-31"
+      },
+      "note": "Southern hemisphere, cold window: 127.7 cm, found by snowfall rather than by the sign of the latitude"
+    },
+    {
+      "name": "climate-queenstown-january",
+      "file": "climate-queenstown-january.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-45.0312&longitude=168.6626&start_date=2025-01-01&end_date=2025-01-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 838,
+      "sha256": "3e8d36ddd8111977dc4cff02ae65b6097fbaf45185c65b03ce1a3bd3a7adf357",
+      "location": {
+        "latitude": -45.0312,
+        "longitude": 168.6626
+      },
+      "window": {
+        "startDate": "2025-01-01",
+        "endDate": "2025-01-31"
+      },
+      "note": "Southern hemisphere, warm window: the month number would call this the cold one"
+    },
+    {
+      "name": "climate-queenstown-july",
+      "file": "climate-queenstown-july.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-45.0312&longitude=168.6626&start_date=2025-07-01&end_date=2025-07-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 839,
+      "sha256": "9430bd0b2024d143a9121f023454b96e3d2c192da8670c02e78955ae1edf0d46",
+      "location": {
+        "latitude": -45.0312,
+        "longitude": 168.6626
+      },
+      "window": {
+        "startDate": "2025-07-01",
+        "endDate": "2025-07-31"
+      },
+      "note": "Southern hemisphere, cold window: the season is found by snowfall, not by the calendar"
+    },
+    {
+      "name": "climate-quito-january",
+      "file": "climate-quito-january.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-0.1807&longitude=-78.4678&start_date=2025-01-01&end_date=2025-01-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 842,
+      "sha256": "2e3f1a14c4271151d08e29a049d39b6104f22b6842307bfbbbe2b30255e9a622",
+      "location": {
+        "latitude": -0.1807,
+        "longitude": -78.4678
+      },
+      "window": {
+        "startDate": "2025-01-01",
+        "endDate": "2025-01-31"
+      },
+      "note": "The other candidate window for Quito"
+    },
+    {
+      "name": "climate-quito-july",
+      "file": "climate-quito-july.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-0.1807&longitude=-78.4678&start_date=2025-07-01&end_date=2025-07-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 843,
+      "sha256": "f14a0f0dad04874dd4d9f85e522afbf1cf8e7b6797eb3efb9917b9bd0bbc5f0c",
+      "location": {
+        "latitude": -0.1807,
+        "longitude": -78.4678
+      },
+      "window": {
+        "startDate": "2025-07-01",
+        "endDate": "2025-07-31"
+      },
+      "note": "2850 m on the equator and no season: elevation is necessary, never sufficient"
+    },
+    {
+      "name": "climate-tromso-january",
+      "file": "climate-tromso-january.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=69.6489&longitude=18.9551&start_date=2025-01-01&end_date=2025-01-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 831,
+      "sha256": "4670be612d48f5f80c350307069c541328c25dd495941240f95e341cb92aa256",
+      "location": {
+        "latitude": 69.6489,
+        "longitude": 18.9551
+      },
+      "window": {
+        "startDate": "2025-01-01",
+        "endDate": "2025-01-31"
+      },
+      "note": "Arctic at 14 m: a season despite the low elevation, which no elevation rule could find"
+    },
+    {
+      "name": "climate-tromso-july",
+      "file": "climate-tromso-july.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=69.6489&longitude=18.9551&start_date=2025-07-01&end_date=2025-07-31&daily=snowfall_sum&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 829,
+      "sha256": "4a282eb8268552576553d32306c20801f63819916f940e5cfab4099fb2b2e196",
+      "location": {
+        "latitude": 69.6489,
+        "longitude": 18.9551
+      },
+      "window": {
+        "startDate": "2025-07-01",
+        "endDate": "2025-07-31"
+      },
+      "note": "The other candidate window for Tromso"
+    },
+    {
       "name": "dubai-heat",
       "file": "dubai-heat.json",
       "endpoint": "archive",
@@ -210,6 +486,25 @@
         "longitude": -0.1257
       },
       "note": "Indoor inversion: rain every day"
+    },
+    {
+      "name": "marine-chamonix-inland",
+      "file": "marine-chamonix-inland.json",
+      "endpoint": "marine",
+      "serves": [
+        "marine"
+      ],
+      "url": "https://marine-api.open-meteo.com/v1/marine?latitude=45.9237&longitude=6.8694&hourly=wave_height&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 4306,
+      "sha256": "6ac53e4ebdfc6ded4f5db52e665026ea057d35a1dd4a359eaba202e51ee4a028",
+      "location": {
+        "latitude": 45.9237,
+        "longitude": 6.8694
+      },
+      "note": "Marine over the Alps: the probe answers 200 with an empty grid, so the winter ski case can state surfing is inapplicable there"
     },
     {
       "name": "marine-geneva-lake",

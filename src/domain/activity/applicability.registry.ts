@@ -33,6 +33,16 @@ export const APPLICABILITY_RULES = {
 
 export type ApplicabilityRuleCode = keyof typeof APPLICABILITY_RULES;
 
+/**
+ * The version of the rule set as a whole: the thresholds, the evidence each
+ * rule reads and how it reads it. A stored profile records the version that
+ * produced it, so changing any of that invalidates profiles deliberately
+ * rather than leaving old conclusions in circulation
+ * (spec `location-applicability`, "A rules version change makes profiles
+ * recomputable"). Bump it in the same commit as the change that earns it.
+ */
+export const APPLICABILITY_RULES_VERSION = 1;
+
 export interface ApplicabilityEntry {
   readonly code: string;
   readonly params: z.ZodType;

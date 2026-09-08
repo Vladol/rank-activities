@@ -138,15 +138,22 @@ export class FixtureRegistry {
  * exists, the requested window says which one. Chamonix has a January and a
  * July archive recording, and the two are the whole point of the
  * "season is not applicability" case.
+ *
+ * Where several recordings cover the window, the tightest one wins. Chamonix
+ * also has a whole-January climate recording that carries snowfall alone, and
+ * answering a seven-day scoring question with it would be picking by manifest
+ * order — which is a property of the file, not of the question.
  */
 function select(candidates: readonly FixtureEntry[], horizon: Horizon): FixtureEntry | undefined {
   if (horizon.kind === 'window') {
-    return candidates.find(
-      (entry) =>
-        entry.window !== undefined &&
-        entry.window.startDate <= horizon.startDate &&
-        horizon.endDate <= entry.window.endDate,
-    );
+    return candidates
+      .filter(
+        (entry) =>
+          entry.window !== undefined &&
+          entry.window.startDate <= horizon.startDate &&
+          horizon.endDate <= entry.window.endDate,
+      )
+      .toSorted((left, right) => spanOf(left) - spanOf(right))[0];
   }
 
   // A rolling forecast is answered by a recording made against the live
@@ -161,6 +168,13 @@ function select(candidates: readonly FixtureEntry[], horizon: Horizon): FixtureE
   // it onto today. Two of them is an ambiguity, and picking either would answer
   // a January question with July data; the caller has to name a window.
   return rolling.length === 0 && candidates.length === 1 ? candidates[0] : undefined;
+}
+
+/** How many days a recording covers; a rolling recording is treated as unbounded. */
+function spanOf(entry: FixtureEntry): number {
+  return entry.window === undefined
+    ? Number.POSITIVE_INFINITY
+    : Date.parse(entry.window.endDate) - Date.parse(entry.window.startDate);
 }
 
 function missing(capability: Capability, key: string): WeatherError {

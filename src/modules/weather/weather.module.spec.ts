@@ -254,3 +254,15 @@ describe('the record source, which is declared but not implemented', () => {
     ).rejects.toThrow(/place lookup/);
   });
 });
+
+describe('importing the weather module from two places', () => {
+  it('binds one set of ports, not one per import', async () => {
+    // Nest keys a dynamic module by the object `forRoot` returned, so two calls
+    // with the same configuration would otherwise build two containers' worth
+    // of ports — and a root that configured a source would find the second set
+    // silently using the default one.
+    expect(WeatherModule.forRoot()).toBe(WeatherModule.forRoot());
+    expect(WeatherModule.forRoot(RECORDED)).toBe(WeatherModule.forRoot(RECORDED));
+    expect(WeatherModule.forRoot(RECORDED)).not.toBe(WeatherModule.forRoot());
+  });
+});

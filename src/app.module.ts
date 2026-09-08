@@ -9,6 +9,7 @@ import { AppResolver } from './app.resolver';
 import { AppService } from './app.service';
 import { validateEnv } from './config/env.schema';
 import { ActivitiesModule } from './modules/activities/activities.module';
+import { GeoModule } from './modules/geo/geo.module';
 import { HealthModule } from './modules/health/health.module';
 import { WeatherModule } from './modules/weather/weather.module';
 
@@ -33,6 +34,10 @@ import { WeatherModule } from './modules/weather/weather.module';
     // recorded sources, which read fixtures and never open a socket
     // (docs/requirements/mocking.md).
     WeatherModule.forRoot(),
+    // Turns a name or a pair of coordinates into a place with an identity, and
+    // decides which activities are possible there before any weather is asked
+    // for. The profile store is in-process until `08-add-data-persistence`.
+    GeoModule,
   ],
   providers: [AppResolver, AppService],
 })

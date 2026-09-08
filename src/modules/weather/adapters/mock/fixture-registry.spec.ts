@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync, rmSync, cpSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync, cpSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -85,6 +85,31 @@ describe('the fixture registry', () => {
 
     expect(winter.ok ? winter.value.entry.name : undefined).toBe('chamonix-winter-ski');
     expect(summer.ok ? summer.value.entry.name : undefined).toBe('chamonix-summer');
+  });
+
+  it('answers a window with the tightest recording that covers it, not the first listed', () => {
+    // Chamonix now holds a seven-day January recording and a whole-January one.
+    // Both cover 9-12 January; only the narrower one was recorded to answer a
+    // question about those days. Which is chosen must not depend on the order
+    // the manifest happens to list them in.
+    const dir = scratch();
+    const manifestPath = join(dir, 'manifest.json');
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+      fixtures: { name: string }[];
+    };
+
+    manifest.fixtures = manifest.fixtures.toSorted((left, right) =>
+      right.name.localeCompare(left.name),
+    );
+    writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
+
+    const resolved = FixtureRegistry.load(dir).resolveSeries(
+      'archive',
+      { latitude: 45.9237, longitude: 6.8694 },
+      { kind: 'window', startDate: '2025-01-09', endDate: '2025-01-12' },
+    );
+
+    expect(resolved.ok ? resolved.value.entry.name : undefined).toBe('chamonix-winter-ski');
   });
 
   it('reports which windows it holds when none of them covers the request', () => {
