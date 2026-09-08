@@ -27,6 +27,15 @@ export const envSchema = z.object({
   WEATHER_MARINE_SOURCE: weatherSource.optional(),
   WEATHER_ARCHIVE_SOURCE: weatherSource.optional(),
 
+  /**
+   * Whether the recording mode may write over a fixture that already exists.
+   * Recording is already an explicit choice; replacing evidence is a second
+   * one, because a fixture is the record of what the API once answered
+   * (spec `open-meteo-source`, "An existing fixture is not overwritten
+   * silently").
+   */
+  WEATHER_RECORD_REPLACE: z.enum(['true', 'false']).default('false'),
+
   /** Default forecast horizon: past 7 days the ranking degrades into noise. */
   FORECAST_DAYS_DEFAULT: z.coerce.number().int().min(1).max(16).default(7),
 

@@ -1,11 +1,11 @@
 import type { Result } from '../../../../domain/shared/result';
 import type { WeatherError } from '../../ports/contracts';
-import {
-  type PlaceCandidate,
-  type PlaceLookupPort,
-  type PlaceQuery,
-  parsePlaceLookupResponse,
+import type {
+  PlaceCandidate,
+  PlaceLookupPort,
+  PlaceQuery,
 } from '../../ports/place-lookup.port';
+import { parsePlaceLookupResponse } from '../open-meteo/geocoding/schema';
 import type { FixtureRegistry } from './fixture-registry';
 import { replayRecordedBody } from './recorded-response';
 import type { RecordedSourceOptions } from './recorded-series.source';

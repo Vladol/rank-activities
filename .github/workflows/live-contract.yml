@@ -1,0 +1,40 @@
+# The live contract test, on a schedule and on demand — never on a push.
+#
+# A fixture proves something about the live API only for as long as the API
+# still answers that way, and nothing in the default suite can notice that it
+# stopped. This run can. It is kept out of CI on purpose: running it with
+# everything else would make every build depend on a third party's uptime and
+# spend the daily quota on pull requests. A red scheduled run is a task; a red
+# build is a blocked team (openspec/changes/06-add-open-meteo-source/design.md,
+# Decision 7).
+name: Live contract
+
+on:
+  schedule:
+    # 05:20 UTC daily. Off the hour: the free tier's limits are shared, and the
+    # top of the hour is where everyone else's cron sits.
+    - cron: '20 5 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: live-contract
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # --legacy-peer-deps: npm 10 bug resolving vitest 4 peer dependencies.
+      - run: npm ci --legacy-peer-deps
+
+      # Four requests, one per capability: three limits apply and the daily one
+      # is twelve times stricter than the hourly.
+      - name: Live contract test
+        run: npm run test:contract

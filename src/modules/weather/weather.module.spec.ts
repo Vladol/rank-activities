@@ -13,7 +13,7 @@ import type { SeriesPort } from './ports/series.port';
 import { MetricPlannerService } from './metric-planner.service';
 import { SourceRouterService } from './source-router.service';
 import { RECORDED_CAPABILITY_SOURCES } from './adapters/mock/recorded-sources';
-import type { SourceRegistry } from './source-selection';
+import type { PlaceLookupRegistry, SourceRegistry } from './source-selection';
 import { WeatherModule } from './weather.module';
 
 function port(sourceId: string, capability: Capability): SeriesPort {
@@ -64,7 +64,11 @@ beforeEach(() => {
   }
 });
 
-function compile(registry: SourceRegistry, env: Record<string, string> = {}) {
+function compile(
+  registry: SourceRegistry,
+  env: Record<string, string> = {},
+  lookups?: PlaceLookupRegistry,
+) {
   return Test.createTestingModule({
     imports: [
       ConfigModule.forRoot({
@@ -73,7 +77,9 @@ function compile(registry: SourceRegistry, env: Record<string, string> = {}) {
         load: [() => validateEnv(env)],
         validate: () => validateEnv(env),
       }),
-      WeatherModule.forRoot(registry),
+      lookups === undefined
+        ? WeatherModule.forRoot(registry)
+        : WeatherModule.forRoot(registry, lookups),
     ],
   }).compile();
 }
@@ -238,18 +244,27 @@ describe('a configuration that mixes a recorded source with a live one', () => {
   });
 });
 
-describe('the record source, which is declared but not implemented', () => {
-  it('refuses the start and points at the recording script', async () => {
-    await expect(compileWithDefaults({ WEATHER_PROVIDER: 'record' })).rejects.toThrow(
-      /scripts\/record-fixture\.ts/,
-    );
+describe('a source that is named but has no implementation', () => {
+  it('refuses the start rather than substituting one that does', async () => {
+    // Every declared name is implemented now, so the case is built rather than
+    // found: the rule is about the binding, not about which names exist today.
+    await expect(
+      compile({ mock: RECORDED_CAPABILITY_SOURCES }, { WEATHER_PROVIDER: 'open-meteo' }),
+    ).rejects.toThrow(/not implemented/);
   });
 
   it('refuses place lookup for it as well', async () => {
     await expect(
       compile(
-        { record: { forecast: () => port('r', 'forecast'), marine: () => port('r', 'marine'), archive: () => port('r', 'archive') } },
+        {
+          record: {
+            forecast: () => port('r', 'forecast'),
+            marine: () => port('r', 'marine'),
+            archive: () => port('r', 'archive'),
+          },
+        },
         { WEATHER_PROVIDER: 'record' },
+        {},
       ),
     ).rejects.toThrow(/place lookup/);
   });
@@ -264,5 +279,91 @@ describe('importing the weather module from two places', () => {
     expect(WeatherModule.forRoot()).toBe(WeatherModule.forRoot());
     expect(WeatherModule.forRoot(RECORDED)).toBe(WeatherModule.forRoot(RECORDED));
     expect(WeatherModule.forRoot(RECORDED)).not.toBe(WeatherModule.forRoot());
+  });
+});
+
+describe('the live Open-Meteo source, once it is chosen', () => {
+  it('binds for every capability it declares', async () => {
+    const moduleRef = await compileWithDefaults({ WEATHER_PROVIDER: 'open-meteo' });
+
+    for (const capability of ['forecast', 'marine', 'archive'] as const) {
+      expect(moduleRef.get<SeriesPort>(CAPABILITY_PORT_TOKENS[capability]).sourceId).toBe(
+        `open-meteo-${capability}`,
+      );
+    }
+  });
+
+  it('binds for place lookup as well', async () => {
+    const moduleRef = await compileWithDefaults({ WEATHER_PROVIDER: 'open-meteo' });
+
+    expect(moduleRef.get<PlaceLookupPort>(PLACE_LOOKUP_PORT).sourceId).toBe('open-meteo-lookup');
+  });
+
+  it('serves one capability without dragging the others onto the network', async () => {
+    const moduleRef = await compileWithDefaults({ WEATHER_MARINE_SOURCE: 'open-meteo' });
+
+    expect(moduleRef.get<SeriesPort>(CAPABILITY_PORT_TOKENS.marine).sourceId).toBe(
+      'open-meteo-marine',
+    );
+    expect(moduleRef.get<SeriesPort>(CAPABILITY_PORT_TOKENS.forecast).sourceId).toBe(
+      'recorded-forecast',
+    );
+  });
+
+  it('names the source it bound, per capability, in the startup log', async () => {
+    const logged = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+
+    await compileWithDefaults({ WEATHER_PROVIDER: 'open-meteo' });
+
+    const lines = logged.mock.calls.map((call) => String(call[0]));
+    logged.mockRestore();
+
+    expect(lines).toContain('forecast capability bound to source "open-meteo"');
+    expect(lines).toContain('marine capability bound to source "open-meteo"');
+  });
+
+  it('refuses the start for a capability the vendor does not declare', async () => {
+    // A source bound to a capability it cannot serve would fail at request
+    // time, one request at a time, in production.
+    const partial: SourceRegistry = { 'open-meteo': { forecast: () => port('open-meteo-forecast', 'forecast') } };
+
+    await expect(compile(partial, { WEATHER_PROVIDER: 'open-meteo' })).rejects.toThrow(
+      /marine/,
+    );
+  });
+});
+
+describe('the recording mode', () => {
+  it('is not selected when nothing is configured', async () => {
+    const moduleRef = await compileWithDefaults();
+
+    // Recording writes files from a running service. It is asked for or it
+    // does not happen.
+    for (const capability of ['forecast', 'marine', 'archive'] as const) {
+      expect(moduleRef.get<SeriesPort>(CAPABILITY_PORT_TOKENS[capability]).sourceId).not.toContain(
+        'open-meteo',
+      );
+    }
+  });
+
+  it('binds the live source when it is asked for by name', async () => {
+    const moduleRef = await compileWithDefaults({ WEATHER_PROVIDER: 'record' });
+
+    // A decorator over the live adapter, not a source of its own: what serves
+    // the request is the same code that serves it without recording.
+    expect(moduleRef.get<SeriesPort>(CAPABILITY_PORT_TOKENS.forecast).sourceId).toBe(
+      'open-meteo-forecast',
+    );
+  });
+
+  it('says which capabilities it is recording', async () => {
+    const logged = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+
+    await compileWithDefaults({ WEATHER_PROVIDER: 'record' });
+
+    const lines = logged.mock.calls.map((call) => String(call[0]));
+    logged.mockRestore();
+
+    expect(lines).toContain('forecast capability bound to source "record"');
   });
 });

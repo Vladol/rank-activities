@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parsePlaceLookupResponse } from './place-lookup.port';
+import { parsePlaceLookupResponse } from './schema';
 
 /** Trimmed from docs/investigation/open-meteo/samples/geocoding-lisbon.json. */
 const LISBON_BODY = {

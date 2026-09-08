@@ -18,7 +18,8 @@
     "lint": "oxlint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "vitest run --config vitest.config.e2e.mts"
+    "test:e2e": "vitest run --config vitest.config.e2e.mts",
+    "test:contract": "vitest run --config vitest.config.contract.mts"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",
@@ -32,6 +33,7 @@
     "graphql": "^16.14.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "undici": "^8.10.2",
     "zod": "^4.5.4"
   },
   "devDependencies": {

@@ -3,6 +3,14 @@ import {
   RECORDED_CAPABILITY_SOURCES,
   recordedPlaceLookupSource,
 } from './adapters/mock/recorded-sources';
+import {
+  OPEN_METEO_CAPABILITY_SOURCES,
+  openMeteoPlaceLookup,
+} from './adapters/open-meteo/live-sources';
+import {
+  RECORDING_CAPABILITY_SOURCES,
+  recordingPlaceLookup,
+} from './adapters/record/record-sources';
 import type { PlaceLookupPort } from './ports/place-lookup.port';
 import type { SeriesPort } from './ports/series.port';
 
@@ -90,8 +98,7 @@ export function bindCapabilitySources(
     if (factory === undefined) {
       throw new Error(
         `Weather source "${name}" is configured for the ${capability} capability but is not implemented. ` +
-          'Configure a source that exists; the service does not substitute another one.' +
-          hintFor(name),
+          'Configure a source that exists; the service does not substitute another one.',
       );
     }
 
@@ -125,8 +132,7 @@ export function bindPlaceLookup(
   if (factory === undefined) {
     throw new Error(
       `Weather source "${name}" is configured for place lookup but is not implemented. ` +
-        'Configure a source that exists; the service does not substitute another one.' +
-        hintFor(name),
+        'Configure a source that exists; the service does not substitute another one.',
     );
   }
 
@@ -134,27 +140,19 @@ export function bindPlaceLookup(
 }
 
 /**
- * `record` is a declared name with no implementation: a live source that would
- * write fixtures as a side effect. Until it exists, fixtures are recorded by
- * the script, and the rejection says so rather than leaving the reader to
- * guess what the value was for
- * (proposal.md of `02-add-mock-weather-provider`, "Out of scope").
- */
-function hintFor(name: WeatherSourceName): string {
-  return name === 'record'
-    ? ' Fixtures are recorded by scripts/record-fixture.ts; run it and use WEATHER_PROVIDER=mock.'
-    : '';
-}
-
-/**
- * The sources this build actually has. The recorded ones are the development
- * default; the live Open-Meteo client registers itself under "open-meteo" in
- * `06-add-open-meteo-source`.
+ * The sources this build actually has. The recorded ones stay the development
+ * default; the live Open-Meteo client is bound only where it is named, per
+ * capability, so forecast can be live while marine is still recorded.
  */
 export const IMPLEMENTED_SOURCES: SourceRegistry = {
   mock: RECORDED_CAPABILITY_SOURCES,
+  'open-meteo': OPEN_METEO_CAPABILITY_SOURCES,
+  // The live source with a writer attached, not a third implementation.
+  record: RECORDING_CAPABILITY_SOURCES,
 };
 
 export const IMPLEMENTED_PLACE_LOOKUPS: PlaceLookupRegistry = {
   mock: recordedPlaceLookupSource,
+  'open-meteo': openMeteoPlaceLookup,
+  record: recordingPlaceLookup,
 };

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parsePlaceLookupResponse } from '../../ports/place-lookup.port';
+import { parsePlaceLookupResponse } from './geocoding/schema';
 import { readFixtureBody, readManifest } from '../mock/fixture-files';
 import { openMeteoResponseSchema, parseOpenMeteoBody } from './open-meteo.schema';
 

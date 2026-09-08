@@ -24,6 +24,21 @@ import { ABSENT_VARIABLE_UNIT, type OpenMeteoResponse } from './open-meteo.schem
  * uv index — is dropped here rather than travelling as an untyped extra.
  */
 
+/**
+ * The version of this mapping. It changes when a conversion, a variable map or
+ * a provenance rule here changes — that is, whenever a body that used to
+ * produce one series would now produce another.
+ *
+ * It lives beside the mappers rather than beside the cache that consumes it
+ * (`01/design.md` left the question open; design.md Decision 8 of this change
+ * closes it). The constant is *invalidated* by an edit to a mapper, and a
+ * version that lives away from the thing it versions is a version nobody
+ * remembers to raise. `07-add-source-caching-and-resilience` imports it to
+ * namespace the cache key, so a mapping change cannot serve entries computed
+ * by the previous one.
+ */
+export const MAPPER_VERSION = '1';
+
 /** Open-Meteo's hourly variable names, for the metrics the dictionary knows. */
 const HOURLY_METRIC_BY_VARIABLE: Readonly<Record<string, MetricCode>> = {
   temperature_2m: 'temperature_2m',
