@@ -1,12 +1,27 @@
 import { type DynamicModule, Logger, Module, type Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import type { Env } from '../../config/env.schema';
+import { CACHE, type CachePort, NullCache } from '../../common/cache/cache.port';
+import { guardCache } from '../../common/cache/guard-cache';
+import { MemoryCache } from '../../common/cache/memory-cache.adapter';
+import { METRICS, MetricsRegistry } from '../../common/metrics/metrics.registry';
+import {
+  budgetLimits,
+  cacheAdapterName,
+  cacheBounds,
+  capabilityLifetimes,
+  placeLifetime,
+  placeNegativeLifetime,
+  resilienceSettings,
+} from '../../config/caching.config';
+import { type Env, readEnv } from '../../config/env.schema';
 import { CAPABILITIES, type Capability } from '../../domain/weather/metric';
 import {
   RECORDED_SOURCE_PREFIX,
   recordedFixtureCount,
 } from './adapters/mock/recorded-sources';
+import { type SourceWrappingOptions, wrapPlaceLookup, wrapSource } from './decorators/wrap-source';
+import { OutboundBudgetService } from './outbound-budget/outbound-budget.service';
 import { guardLimits } from './ports/limits';
 import type { PlaceLookupPort } from './ports/place-lookup.port';
 import type { SeriesPort } from './ports/series.port';
@@ -25,6 +40,9 @@ import {
 } from './source-selection';
 
 const BOUND_SOURCES = Symbol('BoundSources');
+
+/** The cache, budget and metrics settings, read from the environment once. */
+const WRAPPING = Symbol('SourceWrapping');
 
 /**
  * One dynamic module per configuration.
@@ -57,10 +75,68 @@ export class WeatherModule {
       return cached;
     }
 
+    const metricsProvider: Provider = { provide: METRICS, useFactory: () => new MetricsRegistry() };
+
+    /**
+     * One adapter for the whole process. The `null` one is the test default,
+     * so a fixture that stopped being read cannot hide behind a hit left by an
+     * earlier test; every adapter is guarded, so its own failures are misses
+     * rather than failed requests (design.md, Decision 9).
+     */
+    const cacheProvider: Provider = {
+      provide: CACHE,
+      inject: [ConfigService, METRICS],
+      useFactory: (config: ConfigService<Env, true>, metrics: MetricsRegistry): CachePort => {
+        const env = readEnv(config);
+        const adapter =
+          cacheAdapterName(env) === 'null' ? new NullCache() : new MemoryCache(cacheBounds(env));
+
+        new Logger(WeatherModule.name).log(`cache adapter "${adapter.name}"`);
+
+        return guardCache(adapter, metrics);
+      },
+    };
+
+    const budgetProvider: Provider = {
+      provide: OutboundBudgetService,
+      inject: [ConfigService, METRICS],
+      useFactory: (config: ConfigService<Env, true>, metrics: MetricsRegistry) =>
+        new OutboundBudgetService({ limits: budgetLimits(readEnv(config)), metrics }),
+    };
+
+    const wrappingProvider: Provider = {
+      provide: WRAPPING,
+      inject: [ConfigService, CACHE, METRICS, OutboundBudgetService],
+      useFactory: (
+        config: ConfigService<Env, true>,
+        store: CachePort,
+        metrics: MetricsRegistry,
+        outbound: OutboundBudgetService,
+      ): SourceWrappingOptions => {
+        const env = readEnv(config);
+
+        return {
+          cache: store,
+          lifetimes: capabilityLifetimes(env),
+          placeLifetime: placeLifetime(env),
+          placeNegativeLifetime: placeNegativeLifetime(env),
+          // The horizon every rolling request is widened to: the product
+          // ceiling, because no request may ask for more and one entry then
+          // answers every shorter question (design.md, Decision 2).
+          maxForecastDays: env.FORECAST_DAYS_MAX,
+          resilience: { budget: outbound, ...resilienceSettings(env) },
+          metrics,
+        };
+      },
+    };
+
     const bound: Provider = {
       provide: BOUND_SOURCES,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService<Env, true>): BoundSources => {
+      inject: [ConfigService, WRAPPING],
+      useFactory: (
+        config: ConfigService<Env, true>,
+        wrapped: SourceWrappingOptions,
+      ): BoundSources => {
         const selection = selectSourceNames({
           WEATHER_PROVIDER: config.get('WEATHER_PROVIDER', { infer: true }),
           WEATHER_FORECAST_SOURCE: config.get('WEATHER_FORECAST_SOURCE', { infer: true }),
@@ -96,8 +172,14 @@ export class WeatherModule {
         }
 
         // Every bound port checks the request against its own declared limits
-        // before anything leaves the process.
-        return { ...result, ports: result.ports.map((port) => guardLimits(port)) };
+        // before anything leaves the process, and every one of them is then
+        // wrapped by the same factory: cache, deduplication, breaker, retry,
+        // budget and metrics are never written into an adapter
+        // (`decorators/wrap-source.ts`).
+        return {
+          ...result,
+          ports: result.ports.map((port) => wrapSource(guardLimits(port), wrapped)),
+        };
       },
     };
 
@@ -109,13 +191,16 @@ export class WeatherModule {
 
     const placeLookup: Provider = {
       provide: PLACE_LOOKUP_PORT,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService<Env, true>): PlaceLookupPort => {
+      inject: [ConfigService, WRAPPING],
+      useFactory: (
+        config: ConfigService<Env, true>,
+        wrapped: SourceWrappingOptions,
+      ): PlaceLookupPort => {
         const lookup = bindPlaceLookup(config.get('WEATHER_PROVIDER', { infer: true }), lookups);
 
         new Logger(WeatherModule.name).log(lookup.log);
 
-        return lookup.port;
+        return wrapPlaceLookup(lookup.port, wrapped);
       },
     };
 
@@ -127,12 +212,25 @@ export class WeatherModule {
 
     const module: DynamicModule = {
       module: WeatherModule,
-      providers: [bound, ...capabilityPorts, placeLookup, router, MetricPlannerService],
+      providers: [
+        metricsProvider,
+        cacheProvider,
+        budgetProvider,
+        wrappingProvider,
+        bound,
+        ...capabilityPorts,
+        placeLookup,
+        router,
+        MetricPlannerService,
+      ],
       exports: [
         ...CAPABILITIES.map((capability) => CAPABILITY_PORT_TOKENS[capability]),
         PLACE_LOOKUP_PORT,
         SourceRouterService,
         MetricPlannerService,
+        METRICS,
+        CACHE,
+        OutboundBudgetService,
       ],
     };
 

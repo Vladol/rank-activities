@@ -114,9 +114,9 @@ describe('the bulkhead bounds how many calls are out at once', () => {
     const { inner, port } = wrapped('forecast', { concurrency: { limit: 2, queue: 1 } });
     let inFlight = 0;
     let peak = 0;
-    let release = (): void => undefined;
+    let release!: () => void;
     const gate = new Promise<void>((resolve) => {
-      release = resolve;
+      release = (): void => resolve();
     });
 
     inner.answer = async (request) => {

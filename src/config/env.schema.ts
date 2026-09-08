@@ -48,8 +48,67 @@ export const envSchema = z.object({
    */
   FORECAST_DAYS_MAX: z.coerce.number().int().min(1).max(16).default(7),
 
-  /** Forecast cache TTL in seconds, aligned with the Open-Meteo refresh rate (section 2.2). */
+  /**
+   * Which cache adapter is bound. Unset means `memory` everywhere except under
+   * `test`, where it means `null`: a fixture that stopped being read must not
+   * hide behind a hit left by the previous test
+   * (stage-four.md, section 5.4).
+   */
+  CACHE_ADAPTER: z.enum(['memory', 'null']).optional(),
+
+  /** Entries the in-memory store may hold, and the bytes it estimates them at. */
+  CACHE_MAX_ENTRIES: z.coerce.number().int().positive().default(5000),
+  CACHE_MAX_BYTES: z.coerce.number().int().positive().default(33_554_432),
+
+  /**
+   * Per-capability lifetimes, in seconds. Freshness ends on the boundary of
+   * the interval rather than an interval after the question, so these describe
+   * the source's own refresh cadence rather than our patience
+   * (spec `source-caching`, "A lifetime ends on the boundary").
+   */
   WEATHER_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+  WEATHER_MARINE_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+  WEATHER_ARCHIVE_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(86_400),
+
+  /**
+   * How old data may be and still be served, marked stale, when it cannot be
+   * refreshed. Past it there is no answer to give: a forecast from yesterday
+   * is worthless, while an archive that never changes is not.
+   */
+  WEATHER_CACHE_MAX_STALE_SECONDS: z.coerce.number().int().positive().default(10_800),
+  WEATHER_MARINE_CACHE_MAX_STALE_SECONDS: z.coerce.number().int().positive().default(10_800),
+  WEATHER_ARCHIVE_CACHE_MAX_STALE_SECONDS: z.coerce.number().int().positive().default(604_800),
+
+  /** How long a resolved place name is reused, and how long an unresolved one is remembered. */
+  GEOCODING_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(2_592_000),
+  GEOCODING_NEGATIVE_TTL_SECONDS: z.coerce.number().int().positive().default(300),
+
+  /**
+   * The outbound budget, one limit per window of the source's published table
+   * (stage-three.md, section 7.4). The unit is an attempt, retries included.
+   */
+  OUTBOUND_BUDGET_PER_MINUTE: z.coerce.number().int().positive().default(600),
+  OUTBOUND_BUDGET_PER_HOUR: z.coerce.number().int().positive().default(5000),
+  OUTBOUND_BUDGET_PER_DAY: z.coerce.number().int().positive().default(10_000),
+
+  /** How many calls may be out at once, and how many may wait for a slot. */
+  OUTBOUND_CONCURRENCY: z.coerce.number().int().positive().default(8),
+  OUTBOUND_CONCURRENCY_QUEUE: z.coerce.number().int().nonnegative().default(8),
+
+  /** Per attempt, never per chain. Live p95 is 136 ms; two seconds is generous. */
+  OUTBOUND_TIMEOUT_MS: z.coerce.number().int().positive().default(2000),
+
+  /** Attempts including the first, and the growth of the jittered delay between them. */
+  OUTBOUND_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(3),
+  OUTBOUND_RETRY_INITIAL_DELAY_MS: z.coerce.number().int().nonnegative().default(150),
+  OUTBOUND_RETRY_MAX_DELAY_MS: z.coerce.number().int().nonnegative().default(5000),
+
+  /**
+   * Consecutive source faults that cut one source-and-capability pair off, and
+   * how long before it is tried again.
+   */
+  BREAKER_CONSECUTIVE_FAILURES: z.coerce.number().int().positive().default(5),
+  BREAKER_HALF_OPEN_AFTER_MS: z.coerce.number().int().positive().default(30_000),
 
   DATABASE_URL: z.url().optional(),
   REDIS_URL: z.url().optional(),
@@ -59,9 +118,48 @@ export const envSchema = z.object({
   .refine((env) => env.FORECAST_DAYS_DEFAULT <= env.FORECAST_DAYS_MAX, {
     path: ['FORECAST_DAYS_DEFAULT'],
     message: 'the default horizon cannot exceed FORECAST_DAYS_MAX',
-  });
+  })
+  // Staleness that does not outlast freshness makes the stale path
+  // unreachable: an entry would expire at the moment it stopped being fresh,
+  // and "stale data is served as an answer" could never happen.
+  .refine((env) => env.WEATHER_CACHE_MAX_STALE_SECONDS >= env.WEATHER_CACHE_TTL_SECONDS, {
+    path: ['WEATHER_CACHE_MAX_STALE_SECONDS'],
+    message: 'data cannot stop being servable before it stops being fresh',
+  })
+  .refine(
+    (env) => env.WEATHER_MARINE_CACHE_MAX_STALE_SECONDS >= env.WEATHER_MARINE_CACHE_TTL_SECONDS,
+    {
+      path: ['WEATHER_MARINE_CACHE_MAX_STALE_SECONDS'],
+      message: 'data cannot stop being servable before it stops being fresh',
+    },
+  )
+  .refine(
+    (env) => env.WEATHER_ARCHIVE_CACHE_MAX_STALE_SECONDS >= env.WEATHER_ARCHIVE_CACHE_TTL_SECONDS,
+    {
+      path: ['WEATHER_ARCHIVE_CACHE_MAX_STALE_SECONDS'],
+      message: 'data cannot stop being servable before it stops being fresh',
+    },
+  );
 
 export type Env = z.infer<typeof envSchema>;
+
+/** Every variable the schema declares, so nothing has to enumerate them by hand. */
+export const ENV_KEYS = Object.keys(envSchema.shape) as (keyof Env)[];
+
+/**
+ * The validated environment as one object, read back out of Nest's config.
+ *
+ * A factory that needs twenty settings would otherwise call `get` twenty times
+ * and misspell one of them silently; here a renamed variable stops being a
+ * value and starts being `undefined` in exactly one place.
+ */
+export function readEnv(config: {
+  get(key: string, options: { infer: true }): unknown;
+}): Env {
+  return Object.fromEntries(
+    ENV_KEYS.map((key) => [key, config.get(key, { infer: true })]),
+  ) as Env;
+}
 
 export function validateEnv(raw: Record<string, unknown>): Env {
   const parsed = envSchema.safeParse(raw);

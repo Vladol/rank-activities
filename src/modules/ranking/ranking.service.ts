@@ -239,8 +239,10 @@ export class RankingService {
     data: GatheredData,
   ): ActivityOutcome | undefined {
     for (const [capability, metrics] of requiredCapabilities(definition)) {
-      if (data.failures.has(capability)) {
-        return missing(reasonFor(capability), metrics);
+      const failure = data.failures.get(capability);
+
+      if (failure !== undefined) {
+        return missing(reasonFor(capability, failure), metrics);
       }
     }
 
@@ -267,11 +269,22 @@ interface GatheredData {
 }
 
 /**
- * Which reason names the failure of a capability. The marine host has its own
- * code because "the wave model is down" is a statement a client can act on,
- * and it is the one failure a user is most likely to see.
+ * Which reason names the failure of a capability.
+ *
+ * An exhausted outbound budget is its own answer rather than "the provider is
+ * unavailable": the provider is fine, and we declined to ask. Both are
+ * retryable and they mean different things to an operator, which is the whole
+ * reason the code exists (ADR 0006).
+ *
+ * The marine host has its own code because "the wave model is down" is a
+ * statement a client can act on, and it is the one failure a user is most
+ * likely to see.
  */
-function reasonFor(capability: Capability): ReasonCode {
+function reasonFor(capability: Capability, failure: WeatherError): ReasonCode {
+  if (failure.code === 'PROVIDER_BUSY') {
+    return 'PROVIDER_BUSY';
+  }
+
   return capability === 'marine' ? 'MARINE_UNAVAILABLE' : 'PROVIDER_UNAVAILABLE';
 }
 
