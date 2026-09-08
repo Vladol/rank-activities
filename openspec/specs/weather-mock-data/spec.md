@@ -5,7 +5,7 @@ that ranking can be developed, tested and demonstrated without network access an
 without waiting for the seasons — while keeping every fixture an honest recording of
 what the live API actually returned.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: The mock serves every source seam without touching the network
 
@@ -38,11 +38,13 @@ requests travel the identical path, and SHALL make no outbound connection of any
 - **THEN** the recorded lookup response is served through the place-lookup port
 - **AND** no outbound connection is made
 
-### Requirement: A fixture is resolved by rounded coordinates
+### Requirement: A fixture is resolved by rounded coordinates and the requested horizon
 
 The mock SHALL resolve a request to a fixture by the requested coordinates rounded to two
 decimal places — the same rounding the service uses to identify a location — so that mock
-and live paths agree on what counts as "the same location".
+and live paths agree on what counts as "the same location". Where more than one recording
+of the same location exists, the mock SHALL select among them by the window the request
+asked for, and SHALL refuse rather than choose when the request names no window.
 
 #### Scenario: A known location resolves to its fixture
 
@@ -65,17 +67,35 @@ and live paths agree on what counts as "the same location".
 - **AND** it does NOT invent a series, return an empty series, or fall back to the
   nearest fixture
 
-### Requirement: The mock rebases a fixture's time axis onto the current date
+#### Scenario: The requested window chooses between two recordings of one place
 
-A fixture is recorded on one date and replayed on another. The mock SHALL shift every
-timestamp in a fixture so that the first day of the series falls on the current local
-date of the fixture's location, preserving values, nulls, series length and the local
-time-of-day of each slot.
+- **WHEN** an archive series is requested for Chamonix, where a January and a July
+  recording share the same rounded coordinates
+- **THEN** the recording whose window covers the requested dates is served
+- **AND** a request whose dates no recording covers is a miss naming the windows that
+  were recorded
+
+#### Scenario: An ambiguous location without a window is refused, not guessed
+
+- **WHEN** a rolling forecast horizon is requested for a location whose only recordings
+  are two archive windows
+- **THEN** the mock returns a `WeatherError` naming both recordings and asking for a
+  window
+- **AND** it does NOT answer a January question with July data by serving whichever
+  recording came first
+
+### Requirement: The mock rebases a rolling forecast onto the current date
+
+A fixture is recorded on one date and replayed on another. For a rolling forecast
+horizon, the mock SHALL shift every timestamp so that the first day of the series falls
+on the current local date of the fixture's location, preserving values, nulls, series
+length and the local time-of-day of each slot. A request naming an explicit date window
+SHALL be served on the dates that were recorded.
 
 #### Scenario: A September fixture replayed in December
 
 - **WHEN** a fixture whose series runs `2026-09-07` … `2026-09-13` is served on
-  `2026-12-01`
+  `2026-12-01` for a rolling seven-day horizon
 - **THEN** the returned series runs `2026-12-01` … `2026-12-07`
 - **AND** the hourly array still holds 168 entries
 - **AND** the value at every index is byte-identical to the recorded value, nulls
@@ -98,6 +118,12 @@ time-of-day of each slot.
 
 - **WHEN** the same fixture is served twice for the same current date
 - **THEN** the two responses are byte-identical
+
+#### Scenario: A request for explicit dates keeps them
+
+- **WHEN** a marine series is requested for the window `2025-07-09` … `2025-07-12`
+- **THEN** the served axis starts on the recorded date, not on today
+- **AND** the values, the nulls and the series length are those of the recording
 
 ### Requirement: Fixtures are verbatim recordings
 

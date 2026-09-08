@@ -1,0 +1,18 @@
+# Implementation order (docs/development-flow/stage-four.md, section 15).
+#
+# The number in a change name is the order its spec was written, not the order
+# to build in: 07 lands before 05 is finished, and 08 before 04 is, because each
+# of those two specs requires behaviour whose mechanism arrives later.
+#
+# 01 and 02 were implemented by hand and are not listed here.
+#
+# One change name per line. Blank lines and #-comments are ignored; a trailing
+# comment on a name is stripped.
+
+03-add-activity-declaration-model
+06-add-open-meteo-source                # first live source; everything below wraps it
+07-add-source-caching-and-resilience    # before 05 is finished
+08-add-data-persistence                 # before 04 is finished
+04-add-location-applicability
+05-add-activity-ranking
+09-add-graphql-api

@@ -8,7 +8,20 @@
       "Bash(npm run build)",
       "Bash(npx tsc --noEmit:*)",
       "Bash(./node_modules/.bin/oxlint:*)",
-      "Bash(openspec:*)"
+      "Bash(openspec:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(node scripts/record-fixture.ts:*)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
     ]
   },
   "hooks": {

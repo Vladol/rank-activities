@@ -116,4 +116,4 @@
       on any docs path from code or CI.
 - [x] 9.4 Run `npm run lint`, `npm test`, `npm run test:e2e`, `npx tsc --noEmit` and
       paste the output; then `/code-review` at level `high`.
-- [ ] 9.5 `/opsx:archive` the change.
+- [x] 9.5 `/opsx:archive` the change.
