@@ -45,9 +45,43 @@ export const REASON = {
   LOCATION_NOT_FOUND: { kind: 'request', i18n: 'reason.location_not_found' },
   HORIZON_TOO_LARGE: { kind: 'request', i18n: 'reason.horizon_too_large' },
   INVALID_COORDINATES: { kind: 'request', i18n: 'reason.invalid_coordinates' },
+  /**
+   * A location that is neither a name nor a point, or that is both. It is
+   * deliberately not `LOCATION_NOT_FOUND`: nothing was looked for, because
+   * nothing legible was asked about (`graphql-api`, "One query takes one
+   * location and a bounded horizon").
+   */
+  INVALID_LOCATION_INPUT: { kind: 'request', i18n: 'reason.invalid_location_input' },
+  /**
+   * The client asked faster than the inbound limit allows. It is a fault in the
+   * stream of requests rather than in this one, and it is refused before any
+   * outbound call: the limit exists as much to protect the source's quota as our
+   * own capacity (stage-six.md, section 5.4).
+   */
+  RATE_LIMITED: { kind: 'request', i18n: 'reason.rate_limited' },
+  /**
+   * The query itself was refused: it does not parse, it does not match the
+   * schema, or it nests deeper than the endpoint allows. It never reaches a
+   * resolver, so nothing was asked of the world (`graphql-api`, "The endpoint
+   * is bounded against abuse").
+   */
+  INVALID_QUERY: { kind: 'request', i18n: 'reason.invalid_query' },
+  /**
+   * Our own fault, and the only code that says nothing about the request. It
+   * carries no detail on purpose: what happened is in the log record the trace
+   * identifier points at, and a type name or a message in the response would be
+   * the leak `graphql-api` exists to prevent.
+   */
+  INTERNAL_ERROR: { kind: 'internal', i18n: 'reason.internal_error' },
 } as const satisfies Record<string, { kind: ReasonKind; i18n: string; retryable?: boolean }>;
 
-export const REASON_KINDS = ['not_applicable', 'constraint', 'no_data', 'request'] as const;
+export const REASON_KINDS = [
+  'not_applicable',
+  'constraint',
+  'no_data',
+  'request',
+  'internal',
+] as const;
 
 export type ReasonKind = (typeof REASON_KINDS)[number];
 

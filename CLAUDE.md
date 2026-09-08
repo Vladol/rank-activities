@@ -47,7 +47,16 @@ npm run db:partitions            # keeps a year of audit partitions provisioned 
   a design error.
 - **Three honest result states:** `Ranked` | `NotApplicable` | `NoData`. Never
   return `score: 0` in place of an honest refusal. Surfing in Prague is
-  `NotApplicable` with reason `NO_COASTLINE_NEARBY`, not "poor waves".
+  `NotApplicable` with reason `NO_COASTLINE_NEARBY`, not "poor waves". On the
+  wire they are a GraphQL union on the activity, never nullable fields on one
+  type: `score: null` is the same lie as `score: 0`.
+- **A failed request is an error; a reported state is data.** Every code the API
+  emits comes from `domain/shared/reason-code.ts`, and nothing else crosses the
+  boundary — no source error text, no invalid body, no stack, no type name. Each
+  response carries a `traceId` that names the log record.
+- **The published schema evolves additively.** New fields are optional,
+  superseded fields are deprecated rather than removed, and a removal needs a
+  proposal. `test/schema.snapshot.graphql` is the contract in review.
 - **External responses are validated with zod at the adapter boundary.** Past that
   point only domain types in canonical units travel through the code.
 - **Tests and `start:dev` never touch the network.** The development default is the
@@ -102,11 +111,13 @@ Chain: `/opsx:explore` → `superpowers:brainstorming` → `/opsx:propose` →
 three axes of change (new activity / swapping the weather provider / changing the
 scoring). Typos, refactors and dependency bumps are ordinary commits with no spec.
 
-Nine capabilities exist; the roadmap and the implementation queue are in
-[stage-four.md §15](docs/development-flow/stage-four.md). **The number is the order the
-spec was written, not the order to build in** — `07` (caching) has to land before `05`
-is finished, and `08` (persistence) before `04` is, because each of those two specs
-requires behaviour whose mechanism arrives later.
+Ten capabilities exist and all ten are built; the roadmap is in
+[stage-four.md §15](docs/development-flow/stage-four.md) and every change project is
+under `openspec/changes/archive/`. **The number is the order the spec was written, not
+the order it was built in** — `07` (caching) had to land before `05` was finished, and
+`08` (persistence) before `04` was, because each of those two specs requires behaviour
+whose mechanism arrives later. `09` (the GraphQL surface) was last: it carries what the
+other nine decided.
 
 ## Layout
 
@@ -117,14 +128,18 @@ src/config/        # zod environment schema, fail-fast at startup; caching and b
 src/infrastructure/db/           # schema, hand-written migrations, seed, startup guard, uuid5
 src/common/cache/  # CachePort, memory and null adapters, cache-keys.ts, codecs, single-flight
 src/common/metrics/# the counter and gauge registry; Prometheus exports it in stage 7
+src/common/trace/  # the request identifier: AsyncLocalStorage and the middleware that opens it
+src/common/errors/ # DomainFailure and the filter that turns it into a transport error
 src/domain/        # pure core: metrics, units, series, Result, location identity and profiles
-src/modules/       # health, weather (ports, selection, adapters), activities, geo, ranking, api
+src/modules/       # weather (ports, selection, adapters), activities, geo, ranking, api
 src/modules/geo/   # location resolver, applicability profile, marine probe, snow-season evidence
 src/modules/geo/adapters/        # in-memory and PostgreSQL stores for locations and profiles
 src/modules/activities/adapters/ # the store-backed catalogue, beside the file-backed one
 src/modules/ranking/audit/       # the buffered computation audit, off the hot path
 src/modules/ranking/     # the use case: resolve -> applicability -> plan -> fetch -> score -> order
-src/modules/api/graphql/ # result models and the mapper; the only place a GraphQL decorator lives
+src/modules/api/graphql/ # models, mapper, input pipe, depth rule; the only place a decorator lives
+src/modules/api/health/  # liveness and readiness, separately addressable
+src/modules/api/throttler/ # the inbound limit, taught where the request is under GraphQL
 src/modules/weather/decorators/          # the one wrapping factory: observed, cached, resilient
 src/modules/weather/outbound-budget/     # token buckets over three windows, counted in attempts
 src/modules/weather/adapters/mock/       # recorded sources, fixture registry, rebaser, fixtures

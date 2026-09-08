@@ -8,7 +8,7 @@ import type { INestApplication } from '@nestjs/common';
 import { AppModule } from '../../src/app.module';
 import { bootstrap } from '../../src/bootstrap';
 import { SchemaGuardService } from '../../src/infrastructure/db/schema-guard.service';
-import { readMigrations } from '../../src/infrastructure/db/migrations';
+import { head, readMigrations } from '../../src/infrastructure/db/migrations';
 import {
   type TestDatabase,
   migratedDatabase,
@@ -53,7 +53,7 @@ describe('starting against a schema that is not the expected one', () => {
     expect(app).toBeUndefined();
     // Both halves, because "the schema is wrong" is not something an operator
     // can act on at three in the morning and "expected X, found Y" is.
-    expect(errors.join('\n')).toContain('0006_audit');
+    expect(errors.join('\n')).toContain(head().tag);
     expect(errors.join('\n')).toContain('Run the migration step of the deploy');
   });
 
@@ -116,7 +116,7 @@ describe('the migration set', () => {
     }
   });
 
-  it('knows six migrations, in the order data-model.md section 9 fixes', () => {
+  it('knows its migrations, in the order data-model.md section 9 fixes', () => {
     expect(readMigrations().map((one) => one.tag)).toEqual([
       '0001_reference',
       '0002_rules',
@@ -124,6 +124,9 @@ describe('the migration set', () => {
       '0004_applicability',
       '0005_place_lookup',
       '0006_audit',
+      // A fifth reason kind, for the code the API answers with when something
+      // we did not foresee went wrong (`graphql-api`).
+      '0007_reason_kinds',
     ]);
   });
 });

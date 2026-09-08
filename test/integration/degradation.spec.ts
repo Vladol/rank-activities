@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../src/app.module';
 import { REASON, isReasonCode } from '../../src/domain/shared/reason-code';
 import { RankingService } from '../../src/modules/ranking/ranking.service';
+import { head } from '../../src/infrastructure/db/migrations';
 import { seed } from '../../src/infrastructure/db/seed/seed';
 import { seedDemonstrationProfiles } from '../../src/infrastructure/db/seed/demonstration-locations';
 import {
@@ -113,7 +114,7 @@ describe('readiness against a schema that is not at head', () => {
 
       expect(response.body.status).toBe('not_ready');
       expect(response.body.store).toBe('schema_mismatch');
-      expect(response.body.detail).toContain('0006_audit');
+      expect(response.body.detail).toContain(head().tag);
     } finally {
       await stale.close();
       await behind.close();

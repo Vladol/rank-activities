@@ -1,0 +1,179 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+union ActivityOutcome = NoDataOutcome | NotApplicableOutcome | RankedOutcome
+
+type ActivityResult {
+  """The stable activity code, never a display title."""
+  activity: String!
+  outcome: ActivityOutcome!
+}
+
+type AggregatedValue {
+  missingCount: Int!
+  sampleCount: Int!
+
+  """The canonical unit, never the source own."""
+  unit: String!
+  value: Float!
+}
+
+"""
+Whether the feature was scored on data, on the profile neutral value, or dropped for want of it.
+"""
+enum ContributionStatus {
+  DEGRADED
+  EXCLUDED
+  USED
+}
+
+type FeatureContribution {
+  contribution: Float
+  featureId: String!
+
+  """Only a limiting feature has one."""
+  gateFactor: Float
+  metric: String!
+  normalized: Float!
+
+  """Absent when the feature had no value to aggregate."""
+  raw: AggregatedValue
+  role: FeatureRole!
+  status: ContributionStatus!
+
+  """Effective share; absent for a limiting feature."""
+  weight: Float
+}
+
+"""Whether the feature contributes a share of the score or limits it."""
+enum FeatureRole {
+  ADDITIVE
+  GATE
+}
+
+input LocationInput {
+  """The language the name is written in."""
+  language: String
+  latitude: Float
+  longitude: Float
+
+  """A city name, in any spelling the geocoder knows."""
+  name: String
+}
+
+type NoDataOutcome {
+  kind: OutcomeKind!
+  messageKey: String!
+  missingMetrics: [String!]!
+  reason: String!
+  retryable: Boolean!
+}
+
+type NotApplicableOutcome {
+  kind: OutcomeKind!
+
+  """
+  The translation key for the reason. The text follows the code, never the reverse.
+  """
+  messageKey: String!
+  reason: String!
+}
+
+enum OutcomeKind {
+  NOT_APPLICABLE
+  NO_DATA
+  RANKED
+}
+
+type Query {
+  """Sanity check that the GraphQL layer is wired up."""
+  hello: String!
+
+  """
+  Ranks every activity in the catalogue against the forecast, for each local day of the horizon.
+  """
+  rankActivities(input: RankingInput!): RankingAnswer!
+}
+
+type RankedDay {
+  """Whether the day was computed from a complete local day."""
+  complete: Boolean!
+
+  """The location own local date, YYYY-MM-DD."""
+  date: String!
+
+  """The hours this day actually held, never assumed to be 24."""
+  hoursCounted: Int!
+
+  """
+  Inapplicable and missing-data results. They take no part in the ordering.
+  """
+  notRanked: [ActivityResult!]!
+
+  """Descending by score, ties by activity code."""
+  ranked: [ActivityResult!]!
+}
+
+type RankedOutcome {
+  breakdown: [FeatureContribution!]!
+
+  """The constraint that drove the score to zero, when one did."""
+  constraintViolated: String
+  definitionVersion: Int!
+  kind: OutcomeKind!
+  profileId: String!
+  profileVersion: Int!
+
+  """0 to 100. Zero is a judgement about today, not a refusal."""
+  score: Int!
+}
+
+type RankingAnswer {
+  days: [RankedDay!]!
+
+  """When the data was obtained, ISO instant."""
+  fetchedAt: String
+  location: ResolvedPlace!
+  profileId: String!
+  profileVersion: Int!
+  requestedDays: Int!
+  scope: ScopeStatement!
+  stale: Boolean!
+
+  """
+  The IANA zone the dates are in. Absent only when nothing ever named one.
+  """
+  timezone: String
+
+  """
+  Outcomes that belong to no day, which happens only when no data was obtained and no local date could be identified.
+  """
+  undated: [ActivityResult!]!
+}
+
+input RankingInput {
+  """
+  Days ahead, including today: a whole number from 1 to 7. Omitted means 7. A larger horizon is refused with HORIZON_TOO_LARGE rather than shortened, because a shortened answer is a different answer given silently.
+  """
+  days: Int
+  location: LocationInput!
+}
+
+type ResolvedPlace {
+  admin1: String
+  countryCode: String
+  elevationMetres: Float
+  id: ID!
+  latitude: Float!
+  longitude: Float!
+  name: String
+}
+
+type ScopeStatement {
+  code: String!
+
+  """What the ranking is explicitly blind to."""
+  excludes: [String!]!
+  messageKey: String!
+}

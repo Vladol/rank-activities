@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
+import { isReasonCode } from '../../../domain/shared/reason-code';
 import { toLocationQuery } from './ranking.args';
+
+/** The fault a malformed input carries, or `undefined` when it was legible. */
+function faultCodeOf(input: Parameters<typeof toLocationQuery>[0]): string | undefined {
+  const read = toLocationQuery(input);
+
+  return 'fault' in read ? read.fault.code : undefined;
+}
 
 describe('reading the location a client asked about', () => {
   it('takes a name as a name', () => {
@@ -22,19 +30,35 @@ describe('reading the location a client asked about', () => {
   });
 
   it('refuses both at once rather than picking one', () => {
-    expect(toLocationQuery({ name: 'Lisbon', latitude: 0, longitude: 0 })).toEqual({
-      fault: 'BOTH',
-    });
+    expect(faultCodeOf({ name: 'Lisbon', latitude: 0, longitude: 0 })).toBe(
+      'INVALID_LOCATION_INPUT',
+    );
   });
 
-  it('refuses half a point', () => {
-    expect(toLocationQuery({ latitude: 38.7 })).toEqual({ fault: 'PARTIAL_COORDINATES' });
-    expect(toLocationQuery({ longitude: -9.1 })).toEqual({ fault: 'PARTIAL_COORDINATES' });
+  it('refuses half a point as a malformed point, not as an absent location', () => {
+    expect(faultCodeOf({ latitude: 38.7 })).toBe('INVALID_COORDINATES');
+    expect(faultCodeOf({ longitude: -9.1 })).toBe('INVALID_COORDINATES');
   });
 
   it('refuses a request that named no location at all', () => {
-    expect(toLocationQuery({})).toEqual({ fault: 'EMPTY' });
-    expect(toLocationQuery({ name: '   ' })).toEqual({ fault: 'EMPTY' });
+    expect(faultCodeOf({})).toBe('INVALID_LOCATION_INPUT');
+    expect(faultCodeOf({ name: '   ' })).toBe('INVALID_LOCATION_INPUT');
+  });
+
+  it('refuses a point that is not on Earth, with its own code and no outbound call', () => {
+    // Distinct from an unresolvable name: a latitude of 999 is our caller's
+    // mistake, and `LOCATION_NOT_FOUND` would make it a fact about the world.
+    expect(faultCodeOf({ latitude: 999, longitude: -9.1333 })).toBe('INVALID_COORDINATES');
+    expect(faultCodeOf({ latitude: 38.7, longitude: 181 })).toBe('INVALID_COORDINATES');
+  });
+
+  it('answers every fault with a code from the reason registry', () => {
+    for (const input of [{}, { name: 'x', latitude: 1, longitude: 1 }, { latitude: 1 }]) {
+      const code = faultCodeOf(input);
+
+      expect(code).toBeDefined();
+      expect(isReasonCode(code ?? '')).toBe(true);
+    }
   });
 
   it('reads the equator and the prime meridian as a point, not as an absent one', () => {

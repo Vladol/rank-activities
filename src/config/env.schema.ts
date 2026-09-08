@@ -49,6 +49,23 @@ export const envSchema = z.object({
   FORECAST_DAYS_MAX: z.coerce.number().int().min(1).max(16).default(7),
 
   /**
+   * How deep a query may nest before it is refused, counted from the operation.
+   * `rankActivities → days → ranked → outcome → breakdown → raw` is six, so the
+   * default leaves room for fragments without leaving room for an amplifier
+   * (stage-six.md, section 2.5).
+   */
+  GRAPHQL_MAX_DEPTH: z.coerce.number().int().min(1).max(30).default(10),
+
+  /**
+   * The inbound limit, per client address and window. Its purpose is as much
+   * the source's quota as our own capacity: a thousand invented city names is a
+   * thousand outbound calls, and this is the only measure that bounds the rate
+   * at which new ones appear (stage-six.md, section 5.4).
+   */
+  INBOUND_RATE_LIMIT: z.coerce.number().int().positive().default(60),
+  INBOUND_RATE_WINDOW_SECONDS: z.coerce.number().int().positive().default(60),
+
+  /**
    * Which cache adapter is bound. Unset means `memory` everywhere except under
    * `test`, where it means `null`: a fixture that stopped being read must not
    * hide behind a hit left by the previous test

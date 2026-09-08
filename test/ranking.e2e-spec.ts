@@ -176,6 +176,6 @@ describe('Ranking (e2e)', () => {
   it('refuses a request that named neither a name nor a point', async () => {
     const body = await rank({ location: {} });
 
-    expect(body.errors?.[0]?.extensions?.code).toBe('EMPTY');
+    expect(body.errors?.[0]?.extensions?.code).toBe('INVALID_LOCATION_INPUT');
   });
 });

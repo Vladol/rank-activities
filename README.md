@@ -145,10 +145,12 @@ exists.
 ## GraphQL
 
 Code-first setup with Apollo Server. The SDL in `src/schema.gql` is generated from the
-decorators on every app start — do not edit it by hand (it is gitignored).
+decorators on every app start — do not edit it by hand (it is gitignored, and a hook
+blocks the edit). `test/schema.snapshot.graphql` is the same file, checked in: a change
+to the published contract shows up as a diff there in review.
 
 - Endpoint: `POST http://localhost:3000/graphql`
-- GraphiQL: open `http://localhost:3000/graphql` in a browser
+- GraphiQL: open `http://localhost:3000/graphql` in a browser (development only)
 
 ```bash
 curl -H 'content-type: application/json' \
@@ -157,3 +159,64 @@ curl -H 'content-type: application/json' \
 
 Add a query or mutation by writing a `@Resolver()` class (see `src/app.resolver.ts`)
 and registering it in the `providers` of its module.
+
+### The one query
+
+`rankActivities(input: RankingInput!)` takes exactly one location — a name **or** a
+pair of coordinates, never both and never neither — and an optional horizon. The
+supported range of days is written into the schema itself, and a longer horizon is
+**refused** with `HORIZON_TOO_LARGE` rather than quietly shortened: answering four days
+to a request for ten is a different answer given silently.
+
+Each activity's result for a day is a **union of three types** — `RankedOutcome`,
+`NotApplicableOutcome`, `NoDataOutcome` — placed on the activity rather than on the
+answer. A client that forgets a member does not compile; a marine outage costs the
+answer surfing and nothing else. There is deliberately no nullable `score`: `null`
+standing in for "impossible here" is the same lie as `0`.
+
+### What is an error and what is a state
+
+A request that could not be understood is a transport error. An answer about a place
+where an activity is impossible is a successful response.
+
+| | Carried as | Example |
+|---|---|---|
+| The request was wrong | an error with a code and a `traceId` | `INVALID_LOCATION_INPUT`, `HORIZON_TOO_LARGE`, `INVALID_COORDINATES`, `LOCATION_NOT_FOUND` |
+| The answer is that it is impossible | data, inside a successful response | `NotApplicableOutcome(NO_COASTLINE_NEARBY)` |
+| The answer is that we do not know | data, inside a successful response | `NoDataOutcome(MARINE_UNAVAILABLE)` |
+
+Every code comes from one registry (`src/domain/shared/reason-code.ts`), so a client
+learns one vocabulary. **Nothing else leaves the process**: no source's error text, no
+invalid body, no stack, no internal type name. What happened is in the log record that
+the `traceId` on the response points at — and every response carries one, successful or
+not.
+
+### Evolution: additive by rule
+
+- A new field on an existing type is **optional**. An existing query must keep answering
+  identically.
+- A superseded field is **deprecated**, not removed. The marker is the record.
+- A removal is a **breaking change** and needs a proposal stating the reason. It is never
+  a side effect of a refactor.
+
+`test/schema-evolution.e2e-spec.ts` enforces the first two against the checked-in
+snapshot.
+
+### The endpoint's bounds
+
+| Measure | Setting | Why |
+|---|---|---|
+| Query depth | `GRAPHQL_MAX_DEPTH` | The schema is shallow and non-recursive; a depth limit costs nothing and a cost analyser would defend against a shape this schema does not have |
+| Operation batching | off, always | A batch passes the inbound limiter once for arbitrarily much work, and breaks the one-request-one-`traceId` correspondence |
+| Introspection | off in production | The schema is generated on every start and lives in the repository |
+| Inbound rate | `INBOUND_RATE_LIMIT`, `INBOUND_RATE_WINDOW_SECONDS`, per client address | A flood of invented city names is a flood of outbound calls: this protects the source's quota as much as our own capacity. The refusal happens before any outbound call |
+
+There is no authentication: there is no user model and nothing to protect per user.
+
+### Health
+
+`GET /health/live` says the process is running. `GET /health/ready` says whether this
+instance should be given traffic — the store reachable and its schema at head. The
+availability of the weather source is in **neither**: a source outage that emptied the
+rotation would silence a service that could still answer from cached data and mark it
+stale. There is no third endpoint meaning both at once.

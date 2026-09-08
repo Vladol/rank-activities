@@ -10,9 +10,10 @@ import { REASON, type ReasonCode } from '../../../domain/shared/reason-code';
  * renamed without a client noticing — and what stops a field nobody meant to
  * publish from arriving by way of a spread.
  *
- * What the transport does with these — the error envelope, complexity limits,
- * throttling — is `09-add-graphql-api`. This change owns the contents and
- * their meaning, and nothing about how they are carried.
+ * What the transport does with these — the error envelope, the endpoint's
+ * bounds, the trace identifier — is `graphql-api`, and lives beside this file.
+ * These models own the contents and their meaning, and nothing about how they
+ * are carried.
  */
 registerEnumType(
   Object.fromEntries(Object.keys(REASON).map((code) => [code, code])) as Record<

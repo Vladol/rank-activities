@@ -7,8 +7,10 @@
 # without it cannot follow them. The task brief is the one thing kept out.
 /docs
 
-# generated GraphQL SDL (code-first)
+# generated GraphQL SDL (code-first). The checked-in copy is
+# test/schema.snapshot.graphql; this is what a failing snapshot writes beside it.
 /src/schema.gql
+/test/schema.snapshot.graphql.actual
 
 # logs
 logs

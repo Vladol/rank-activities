@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { REASON, type ReasonCode, isReasonCode, reasonsOfKind } from './reason-code';
+import { REASON, REASON_KINDS, type ReasonCode, isReasonCode, reasonsOfKind } from './reason-code';
 
 /** The registry of docs/development-flow/stage-four.md, section 4.1. */
 describe('the reason registry', () => {
   it('declares every reason once, with a kind and an i18n key', () => {
     for (const [code, entry] of Object.entries(REASON)) {
       expect(entry.i18n, code).toBe(`reason.${code.toLowerCase()}`);
-      expect(['not_applicable', 'constraint', 'no_data', 'request']).toContain(entry.kind);
+      expect(REASON_KINDS, code).toContain(entry.kind);
     }
   });
 

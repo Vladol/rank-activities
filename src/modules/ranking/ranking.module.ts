@@ -55,6 +55,9 @@ import { RANKING_LIMITS, RankingService } from './ranking.service';
     { provide: AUDIT_PORT, useExisting: AuditBufferService },
     RankingService,
   ],
-  exports: [RankingService, AUDIT_PORT, AuditBufferService],
+  // RANKING_LIMITS is exported because the API refuses an over-long horizon at
+  // the door, before the use case is entered and therefore before any outbound
+  // call (`graphql-api`, "The endpoint is bounded against abuse").
+  exports: [RankingService, RANKING_LIMITS, AUDIT_PORT, AuditBufferService],
 })
 export class RankingModule {}
