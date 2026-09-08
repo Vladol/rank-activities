@@ -33,6 +33,8 @@ describe('the reason registry', () => {
 
   it('says which no-data reasons are worth retrying', () => {
     expect(REASON.PROVIDER_UNAVAILABLE.retryable).toBe(true);
+    // The budget refills on its own; asking again later is exactly the fix.
+    expect(REASON.PROVIDER_BUSY.retryable).toBe(true);
     expect(REASON.MARINE_UNAVAILABLE.retryable).toBe(true);
     // Gaps in a recorded day do not fill in on a second call.
     expect(REASON.TOO_MANY_GAPS.retryable).toBe(false);

@@ -21,8 +21,24 @@ export const REQUEST_ERROR_CODES = [
 
 export type RequestErrorCode = (typeof REQUEST_ERROR_CODES)[number];
 
+/**
+ * Faults of our own protection rather than of the source: the call was refused
+ * before it left, and no attempt was made. They are kept apart from the six
+ * source faults for the same reason as the request faults — "the source failed"
+ * and "we declined to ask" must never read the same
+ * (`07-add-source-caching-and-resilience`, design.md Decision 6).
+ */
+export const RESILIENCE_ERROR_CODES = [
+  /** No outbound budget remained, or too many calls were already in flight. */
+  'PROVIDER_BUSY',
+  /** Repeated failures have cut this source and capability off for now. */
+  'CIRCUIT_OPEN',
+] as const;
+
+export type ResilienceErrorCode = (typeof RESILIENCE_ERROR_CODES)[number];
+
 /** Every code a port may return, source-side and our side alike. */
-export type PortErrorCode = WeatherErrorCode | RequestErrorCode;
+export type PortErrorCode = WeatherErrorCode | RequestErrorCode | ResilienceErrorCode;
 
 /**
  * What a port returns instead of throwing. It carries our code and our

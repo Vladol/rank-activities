@@ -20,6 +20,12 @@ export const REASON = {
   SEVERE_WEATHER: { kind: 'constraint', i18n: 'reason.severe_weather' },
   // NoData — we cannot answer honestly.
   PROVIDER_UNAVAILABLE: { kind: 'no_data', i18n: 'reason.provider_unavailable', retryable: true },
+  /**
+   * Our own outbound budget is spent, not the source's patience. The request
+   * is answered rather than queued: a queue would turn an exhausted quota into
+   * a rising p95, which is an outage disguised as slowness (ADR 0006).
+   */
+  PROVIDER_BUSY: { kind: 'no_data', i18n: 'reason.provider_busy', retryable: true },
   MARINE_UNAVAILABLE: { kind: 'no_data', i18n: 'reason.marine_unavailable', retryable: true },
   TOO_MANY_GAPS: { kind: 'no_data', i18n: 'reason.too_many_gaps', retryable: false },
   MISSING_REQUIRED_METRIC: {

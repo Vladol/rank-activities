@@ -42,6 +42,27 @@ export class FakePlaceLookup implements PlaceLookupPort {
   }
 }
 
+/**
+ * A lookup whose answer depends on the name asked about, which is what the
+ * negative cache is made of: one name resolves, another does not, and the
+ * question is which of them reaches the source a second time.
+ */
+export function scriptedPlaceLookup(
+  script: (query: PlaceQuery) => Result<readonly PlaceCandidate[], WeatherError>,
+): PlaceLookupPort & { readonly queries: readonly PlaceQuery[] } {
+  const queries: PlaceQuery[] = [];
+
+  return {
+    sourceId: 'scripted-lookup',
+    queries,
+    lookup: (query) => {
+      queries.push(query);
+
+      return Promise.resolve(script(query));
+    },
+  };
+}
+
 export function placeCandidate(overrides: Partial<PlaceCandidate> = {}): PlaceCandidate {
   return {
     sourcePlaceId: '1',
