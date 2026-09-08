@@ -15,11 +15,32 @@ export const GRANULARITIES = ['hourly', 'daily', 'both'] as const;
 
 export type Granularity = (typeof GRANULARITIES)[number];
 
+/** What kind of quantity the metric is, which decides how it may be compared. */
+export const METRIC_KINDS = ['continuous', 'categorical', 'flag'] as const;
+
+export type MetricKind = (typeof METRIC_KINDS)[number];
+
 export interface MetricDefinition<Code extends string = string> {
   readonly code: Code;
   readonly canonicalUnit: CanonicalUnit;
   readonly granularity: Granularity;
   readonly capability: Capability;
+  readonly kind: MetricKind;
+  /**
+   * The **physical** bounds of the metric in its canonical unit, not the range
+   * the seven recorded locations happen to cover: 1.6 m is the deepest snow on
+   * record here and that does not make 4 m an error
+   * (docs/development-flow/stage-five.md, section 8).
+   *
+   * It is half of the defence against a threshold written in the wrong unit.
+   * The range alone cannot reject a gust threshold of 60 — 60 m/s is a possible
+   * hurricane — and the declared unit alone cannot see a typo in the number.
+   * Together the unit makes the author's intent explicit and the range rejects
+   * a value that is only meaningful in another unit.
+   *
+   * Absent for the metrics that carry no number: `sunrise` and `sunset`.
+   */
+  readonly plausible?: readonly [min: number, max: number];
 }
 
 /**
@@ -32,34 +53,34 @@ export interface MetricDefinition<Code extends string = string> {
  * derives it from the metrics surfing declares (design.md, Decision 2).
  */
 export const METRICS = defineMetricDictionary({
-  snow_depth: def('snow_depth', 'm', 'hourly', 'forecast'),
+  snow_depth: def('snow_depth', 'm', 'hourly', 'forecast', 'continuous', [0, 30]),
   // Beside snow_depth in metres. The 100x trap of stage-three.md, section 2.4.
-  snowfall: def('snowfall', 'cm', 'both', 'forecast'),
-  freezing_level_height: def('freezing_level_height', 'm', 'hourly', 'forecast'),
-  temperature_2m: def('temperature_2m', 'degC', 'hourly', 'forecast'),
-  apparent_temperature: def('apparent_temperature', 'degC', 'hourly', 'forecast'),
-  precipitation: def('precipitation', 'mm', 'both', 'forecast'),
-  precipitation_hours: def('precipitation_hours', 'hour', 'daily', 'forecast'),
-  precipitation_probability: def('precipitation_probability', 'percent', 'hourly', 'forecast'),
+  snowfall: def('snowfall', 'cm', 'both', 'forecast', 'continuous', [0, 300]),
+  freezing_level_height: def('freezing_level_height', 'm', 'hourly', 'forecast', 'continuous', [0, 6000]),
+  temperature_2m: def('temperature_2m', 'degC', 'hourly', 'forecast', 'continuous', [-90, 60]),
+  apparent_temperature: def('apparent_temperature', 'degC', 'hourly', 'forecast', 'continuous', [-90, 60]),
+  precipitation: def('precipitation', 'mm', 'both', 'forecast', 'continuous', [0, 400]),
+  precipitation_hours: def('precipitation_hours', 'hour', 'daily', 'forecast', 'continuous', [0, 24]),
+  precipitation_probability: def('precipitation_probability', 'percent', 'hourly', 'forecast', 'continuous', [0, 100]),
   // Sent as km/h, crosses the port as m/s.
-  wind_speed_10m: def('wind_speed_10m', 'm/s', 'both', 'forecast'),
-  wind_gusts_10m: def('wind_gusts_10m', 'm/s', 'both', 'forecast'),
-  wind_direction_10m: def('wind_direction_10m', 'degree', 'both', 'forecast'),
-  cloud_cover: def('cloud_cover', 'percent', 'hourly', 'forecast'),
-  sunshine_duration: def('sunshine_duration', 'second', 'both', 'forecast'),
+  wind_speed_10m: def('wind_speed_10m', 'm/s', 'both', 'forecast', 'continuous', [0, 40]),
+  wind_gusts_10m: def('wind_gusts_10m', 'm/s', 'both', 'forecast', 'continuous', [0, 45]),
+  wind_direction_10m: def('wind_direction_10m', 'degree', 'both', 'forecast', 'continuous', [0, 360]),
+  cloud_cover: def('cloud_cover', 'percent', 'hourly', 'forecast', 'continuous', [0, 100]),
+  sunshine_duration: def('sunshine_duration', 'second', 'both', 'forecast', 'continuous', [0, 86400]),
   // Sent in metres, crosses the port as km.
-  visibility: def('visibility', 'km', 'hourly', 'forecast'),
-  weather_code: def('weather_code', 'wmo_code', 'both', 'forecast'),
-  is_day: def('is_day', 'boolean', 'hourly', 'forecast'),
-  daylight_duration: def('daylight_duration', 'second', 'daily', 'forecast'),
-  sunrise: def('sunrise', 'iso8601', 'daily', 'forecast'),
-  sunset: def('sunset', 'iso8601', 'daily', 'forecast'),
-  temperature_2m_max: def('temperature_2m_max', 'degC', 'daily', 'forecast'),
-  temperature_2m_min: def('temperature_2m_min', 'degC', 'daily', 'forecast'),
-  wave_height: def('wave_height', 'm', 'both', 'marine'),
-  wave_period: def('wave_period', 'second', 'both', 'marine'),
-  wave_direction: def('wave_direction', 'degree', 'both', 'marine'),
-  sea_surface_temperature: def('sea_surface_temperature', 'degC', 'hourly', 'marine'),
+  visibility: def('visibility', 'km', 'hourly', 'forecast', 'continuous', [0, 100]),
+  weather_code: def('weather_code', 'wmo_code', 'both', 'forecast', 'categorical', [0, 99]),
+  is_day: def('is_day', 'boolean', 'hourly', 'forecast', 'flag', [0, 1]),
+  daylight_duration: def('daylight_duration', 'second', 'daily', 'forecast', 'continuous', [0, 86400]),
+  sunrise: def('sunrise', 'iso8601', 'daily', 'forecast', 'continuous'),
+  sunset: def('sunset', 'iso8601', 'daily', 'forecast', 'continuous'),
+  temperature_2m_max: def('temperature_2m_max', 'degC', 'daily', 'forecast', 'continuous', [-90, 60]),
+  temperature_2m_min: def('temperature_2m_min', 'degC', 'daily', 'forecast', 'continuous', [-90, 60]),
+  wave_height: def('wave_height', 'm', 'both', 'marine', 'continuous', [0, 30]),
+  wave_period: def('wave_period', 'second', 'both', 'marine', 'continuous', [0, 30]),
+  wave_direction: def('wave_direction', 'degree', 'both', 'marine', 'continuous', [0, 360]),
+  sea_surface_temperature: def('sea_surface_temperature', 'degC', 'hourly', 'marine', 'continuous', [-5, 40]),
 });
 
 export type MetricCode = keyof typeof METRICS;
@@ -100,7 +121,7 @@ export function validateMetricDictionary(
   dictionary: Readonly<Record<string, MetricDefinition<string>>>,
 ): void {
   for (const [code, entry] of Object.entries(dictionary)) {
-    for (const field of ['canonicalUnit', 'granularity', 'capability'] as const) {
+    for (const field of ['canonicalUnit', 'granularity', 'capability', 'kind'] as const) {
       if (entry[field] === undefined) {
         throw new Error(`Metric "${code}" has no ${field} in the metric dictionary.`);
       }
@@ -113,6 +134,10 @@ function def<Code extends string>(
   canonicalUnit: CanonicalUnit,
   granularity: Granularity,
   capability: Capability,
+  kind: MetricKind,
+  plausible?: readonly [min: number, max: number],
 ): MetricDefinition<Code> {
-  return { code, canonicalUnit, granularity, capability };
+  return plausible === undefined
+    ? { code, canonicalUnit, granularity, capability, kind }
+    : { code, canonicalUnit, granularity, capability, kind, plausible };
 }

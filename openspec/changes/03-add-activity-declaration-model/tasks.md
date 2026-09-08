@@ -29,21 +29,21 @@
 
 ## 2. Declaration format and validation
 
-- [ ] 2.1 Write a failing test loading a declaration that references an unknown metric,
+- [x] 2.1 Write a failing test loading a declaration that references an unknown metric,
       then add the declaration types and the load-time schema in `src/domain/activity/`.
-- [ ] 2.2 Test: normaliser parameters that do not satisfy the normaliser's schema fail the
+- [x] 2.2 Test: normaliser parameters that do not satisfy the normaliser's schema fail the
       load, naming the feature.
-- [ ] 2.3 Test: one invalid declaration prevents startup even when the others are valid.
-- [ ] 2.4 Implement weight normalisation on load over contributing features only; test
+- [x] 2.3 Test: one invalid declaration prevents startup even when the others are valid.
+- [x] 2.4 Implement weight normalisation on load over contributing features only; test
       rescaling of weights summing to 2.0, rejection of weights summing to 0, and that
       adding a limiting feature does not rescale the others.
-- [ ] 2.5 Implement shared-rule includes; test that the severe-weather constraint reaches
+- [x] 2.5 Implement shared-rule includes; test that the severe-weather constraint reaches
       all four activities including indoor, that the no-daylight constraint reaches the
       three outdoor activities and not indoor, and that an unknown include fails the load.
-- [ ] 2.6 Test that a published version cannot be redefined with different content.
-- [ ] 2.7 Implement the unit restatement check; test that a feature declaring `km/h` for a
+- [x] 2.6 Test that a published version cannot be redefined with different content.
+- [x] 2.7 Implement the unit restatement check; test that a feature declaring `km/h` for a
       metric carried in `m/s` fails the load, naming both units.
-- [ ] 2.8 Add `plausible` ranges to the metric dictionary and check every declared
+- [x] 2.8 Add `plausible` ranges to the metric dictionary and check every declared
       threshold and curve parameter against them; test that a gust threshold of `60`
       declared in `m/s` fails the load.
 

@@ -150,3 +150,45 @@ describe('validateMetricDictionary', () => {
     expect(() => validateMetricDictionary(broken)).toThrow(/visibility.*granularity/);
   });
 });
+
+describe('the plausible ranges added by stage-five.md section 8', () => {
+  const NUMERIC_METRICS = STAGE_THREE_METRICS.filter(
+    (code) => metric(code as MetricCode).canonicalUnit !== 'iso8601',
+  );
+
+  it.each(NUMERIC_METRICS)('%s declares a physically plausible range and a kind', (code) => {
+    const entry = metric(code as MetricCode);
+
+    expect(entry.plausible).toBeDefined();
+    expect(entry.plausible?.[0]).toBeLessThan(entry.plausible?.[1] ?? 0);
+    expect(['continuous', 'categorical', 'flag']).toContain(entry.kind);
+  });
+
+  it('leaves the two ISO metrics without a range, because they carry no number', () => {
+    expect(metric('sunrise').plausible).toBeUndefined();
+    expect(metric('sunset').plausible).toBeUndefined();
+  });
+
+  it('bounds gusts below the value that would only make sense in km/h', () => {
+    // The whole point of the range: 60 is a possible hurricane in m/s, and the
+    // range alone cannot reject it — but a threshold of 60 written by someone
+    // thinking in km/h must not load (stage-five.md, section 8).
+    expect(metric('wind_gusts_10m').plausible).toEqual([0, 45]);
+  });
+
+  it('bounds visibility in kilometres, so a threshold written in metres is out of range', () => {
+    expect(metric('visibility').plausible?.[1]).toBeLessThan(1000);
+  });
+
+  it('calls the WMO code categorical and the day flag a flag', () => {
+    expect(metric('weather_code').kind).toBe('categorical');
+    expect(metric('is_day').kind).toBe('flag');
+    expect(metric('temperature_2m').kind).toBe('continuous');
+  });
+
+  it('keeps the ranges physical rather than observed', () => {
+    // 1.6 m is the deepest snow the seven recorded locations hold; that does
+    // not make 4 m an error (stage-five.md, section 8).
+    expect(metric('snow_depth').plausible?.[1]).toBeGreaterThan(4);
+  });
+});
