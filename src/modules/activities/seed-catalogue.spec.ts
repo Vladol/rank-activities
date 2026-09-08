@@ -77,6 +77,38 @@ describe('the seeded catalogue', () => {
     }
   });
 
+  it('ranks one version of an activity, not every version it has ever had', () => {
+    // Publishing version 2 must not make the activity appear twice, and
+    // keeping only whichever file was read last is the silent overwrite the
+    // version check exists to prevent.
+    const dir = seedsWith({
+      'ski-v2.activity.json': {
+        ...(JSON.parse(readFileSync(join(seedDir(), 'ski.activity.json'), 'utf8')) as object),
+        version: 2,
+      },
+    });
+    const catalogue = SeedActivityCatalogue.load(dir);
+
+    expect(catalogue.activities().map((activity) => activity.code).toSorted()).toEqual([
+      ...SEEDED_ACTIVITIES,
+    ]);
+    expect(catalogue.find('ski')?.version).toBe(2);
+  });
+
+  it('keeps the earlier version reachable, so a past computation can be reproduced', () => {
+    const dir = seedsWith({
+      'ski-v2.activity.json': {
+        ...(JSON.parse(readFileSync(join(seedDir(), 'ski.activity.json'), 'utf8')) as object),
+        version: 2,
+      },
+    });
+    const catalogue = SeedActivityCatalogue.load(dir);
+
+    expect(catalogue.findVersion('ski', 1)?.version).toBe(1);
+    expect(catalogue.findVersion('ski', 2)?.version).toBe(2);
+    expect(catalogue.findVersion('ski', 3)).toBeUndefined();
+  });
+
   it('refuses to start on one broken declaration, keeping none of the others', () => {
     const dir = seedsWith({
       'ski.activity.json': { code: 'ski', version: 1, titleKey: 'activity.ski', features: [] },

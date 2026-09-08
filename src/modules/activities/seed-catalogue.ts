@@ -15,10 +15,28 @@ import { readSeedFiles, seedDir } from './seed-files';
  * request time. A broken declaration is never skipped so the others can load.
  */
 export class SeedActivityCatalogue implements ActivityCataloguePort {
+  /** The highest version of each activity: what gets ranked. */
+  private readonly active: readonly ResolvedDefinition[];
+
   private readonly byCode: ReadonlyMap<string, ResolvedDefinition>;
 
   private constructor(private readonly definitions: readonly ResolvedDefinition[]) {
-    this.byCode = new Map(definitions.map((definition) => [definition.code, definition]));
+    // A published version stays reachable so a past computation can be
+    // reproduced, but only one version of an activity is offered: ranking an
+    // activity twice, or keeping whichever file happened to be read last,
+    // are both the silent overwrite the version check exists to prevent.
+    const latest = new Map<string, ResolvedDefinition>();
+
+    for (const definition of definitions) {
+      const known = latest.get(definition.code);
+
+      if (known === undefined || definition.version > known.version) {
+        latest.set(definition.code, definition);
+      }
+    }
+
+    this.byCode = latest;
+    this.active = [...latest.values()];
   }
 
   static load(dir: string = seedDir()): SeedActivityCatalogue {
@@ -33,11 +51,18 @@ export class SeedActivityCatalogue implements ActivityCataloguePort {
   }
 
   activities(): readonly ResolvedDefinition[] {
-    return this.definitions;
+    return this.active;
   }
 
   find(code: string): ResolvedDefinition | undefined {
     return this.byCode.get(code);
+  }
+
+  /** A specific published version, for reproducing a computation made under it. */
+  findVersion(code: string, version: number): ResolvedDefinition | undefined {
+    return this.definitions.find(
+      (definition) => definition.code === code && definition.version === version,
+    );
   }
 }
 

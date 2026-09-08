@@ -56,9 +56,16 @@ function entry<P>(definition: {
   };
 }
 
+/**
+ * `from` must be below `to` for both `linear` and `inverse`. Equal bounds are a
+ * division by zero; reversed bounds are a curve running against the
+ * monotonicity its own entry declares — a descending `linear` wearing an
+ * ascending name, which is precisely the confusion two separate codes exist to
+ * prevent (stage-five.md, section 2).
+ */
 const linearParams = z
   .object({ from: z.number(), to: z.number() })
-  .refine((params) => params.from !== params.to, 'from must differ from to');
+  .refine((params) => params.from < params.to, 'from must be below to');
 
 const bellParams = z.object({ center: z.number(), sigma: z.number().positive() });
 

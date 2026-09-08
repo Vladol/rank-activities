@@ -54,6 +54,17 @@ describe('each entry validates its own parameters', () => {
     expect(normalizerEntry('linear').params.safeParse({ from: 5, to: 6 }).success).toBe(true);
   });
 
+  it('refuses reversed bounds, which would run against the declared monotonicity', () => {
+    // `linear{from: 20, to: 0}` is a descending curve wearing an ascending
+    // entry's name. The reason there are two codes rather than one is that the
+    // intent should be legible in the declaration, and the declared
+    // monotonicity should be true of the curve (stage-five.md, section 2).
+    expect(normalizerEntry('linear').params.safeParse({ from: 20, to: 0 }).success).toBe(false);
+    expect(normalizerEntry('inverse').params.safeParse({ from: 17, to: 8 }).success).toBe(false);
+    // The windows the seeds actually use, negative bounds included.
+    expect(normalizerEntry('inverse').params.safeParse({ from: -300, to: 300 }).success).toBe(true);
+  });
+
   it('refuses a gaussian with sigma zero', () => {
     expect(normalizerEntry('gaussian').params.safeParse({ center: 20, sigma: 0 }).success).toBe(false);
     expect(normalizerEntry('gaussian').params.safeParse({ center: 20, sigma: 9 }).success).toBe(true);

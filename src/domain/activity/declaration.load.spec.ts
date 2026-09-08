@@ -578,6 +578,85 @@ describe('thresholds against the plausible range of the metric', () => {
     expect(isOk(result)).toBe(true);
   });
 
+  it('refuses a predicate threshold written in the wrong unit', () => {
+    // The predicate compares the metric's own values, so 5000 here is metres
+    // in a field carried in kilometres. It never reaches the curve, so nothing
+    // downstream would notice: the share would simply read 1.0 every day.
+    const faults = faultsOf(
+      declaration({
+        features: withFeature('gusts', {
+          metric: 'visibility',
+          unit: 'km',
+          aggregation: {
+            type: 'shareOfHours',
+            params: { predicate: { op: 'gt', value: 5000 }, window: 'day' },
+          },
+          normalizer: { type: 'linear', params: { from: 0.4, to: 1 } },
+        }),
+      }),
+    );
+
+    expect(faults.join('\n')).toMatch(/5000/);
+    expect(faults.join('\n')).toMatch(/visibility/);
+  });
+
+  it('refuses a magnitude comparison on a categorical metric inside a predicate', () => {
+    // Rejected as a constraint leaf already; a WMO code is no more ordered
+    // inside countIf than outside it.
+    const faults = faultsOf(
+      declaration({
+        features: withFeature('gusts', {
+          metric: 'weather_code',
+          unit: 'wmo_code',
+          aggregation: {
+            type: 'countIf',
+            params: { predicate: { op: 'gte', value: 95 }, window: 'day' },
+          },
+          normalizer: { type: 'linear', params: { from: 0, to: 6 } },
+        }),
+      }),
+    );
+
+    expect(faults.join('\n')).toMatch(/weather_code/);
+  });
+
+  it('accepts the predicates the seeds actually use', () => {
+    const result = load(
+      declaration({
+        features: withFeature('gusts', {
+          metric: 'weather_code',
+          unit: 'wmo_code',
+          aggregation: {
+            type: 'countIf',
+            params: { predicate: { op: 'in', value: [95, 96] }, window: 'day' },
+          },
+          normalizer: { type: 'linear', params: { from: 0, to: 6 } },
+        }),
+      }),
+    );
+
+    expect(isOk(result)).toBe(true);
+  });
+
+  it('walks into a composite predicate', () => {
+    const faults = faultsOf(
+      declaration({
+        features: withFeature('gusts', {
+          aggregation: {
+            type: 'shareOfHours',
+            params: {
+              predicate: { anyOf: [{ op: 'lt', value: 5 }, { not: { op: 'gt', value: 900 } }] },
+              window: 'day',
+            },
+          },
+          normalizer: { type: 'linear', params: { from: 0.4, to: 1 } },
+        }),
+      }),
+    );
+
+    expect(faults.join('\n')).toMatch(/900/);
+  });
+
   it('refuses a share threshold that is not a share', () => {
     const faults = faultsOf(
       declaration({

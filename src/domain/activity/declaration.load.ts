@@ -6,7 +6,7 @@ import {
   type AggregatorEntry,
   aggregatorRegistry,
 } from '../weather/aggregation/aggregator.registry';
-import { COMPARE_OPS, type CompareOp } from '../weather/aggregation/predicate';
+import { COMPARE_OPS, type CompareOp, type Predicate } from '../weather/aggregation/predicate';
 import {
   type RequirableMetric,
   derivedMetric,
@@ -447,6 +447,10 @@ function checkAggregation(
     return undefined;
   }
 
+  if (meta !== undefined) {
+    checkPredicateParams(params.data, meta, activity, `${path}.aggregation.params`, faults);
+  }
+
   if (meta !== undefined && !servesChannel(meta.granularity, entry.granularity)) {
     faults.push({
       activity,
@@ -458,6 +462,79 @@ function checkAggregation(
   }
 
   return entry;
+}
+
+/**
+ * A predicate inside `shareOfHours` or `countIf` compares the metric's own raw
+ * values, so its thresholds are measured against the metric's own range and
+ * not against the unit the aggregation answers in. Nothing downstream would
+ * catch a mistake here: a visibility threshold of 5000 metres in a field
+ * carried in kilometres simply reports a share of 1.0 every day.
+ */
+function checkPredicateParams(
+  params: unknown,
+  meta: ResolvedMetricMeta,
+  activity: string,
+  path: string,
+  faults: DeclarationFault[],
+): void {
+  const predicate = (params as { predicate?: unknown } | undefined)?.predicate;
+
+  if (predicate !== undefined) {
+    walkPredicate(predicate as Predicate, meta, activity, path, faults);
+  }
+}
+
+function walkPredicate(
+  predicate: Predicate,
+  meta: ResolvedMetricMeta,
+  activity: string,
+  path: string,
+  faults: DeclarationFault[],
+): void {
+  if ('anyOf' in predicate) {
+    predicate.anyOf.forEach((branch) => walkPredicate(branch, meta, activity, path, faults));
+
+    return;
+  }
+
+  if ('allOf' in predicate) {
+    predicate.allOf.forEach((branch) => walkPredicate(branch, meta, activity, path, faults));
+
+    return;
+  }
+
+  if ('not' in predicate) {
+    walkPredicate(predicate.not, meta, activity, path, faults);
+
+    return;
+  }
+
+  const setOp = predicate.op === 'in' || predicate.op === 'notIn';
+
+  if (meta.categorical && !setOp) {
+    faults.push({
+      activity,
+      path,
+      message: `compares the categorical metric "${meta.code}" by magnitude with "${predicate.op}"; a code is a category, so only "in" and "notIn" apply`,
+    });
+  }
+
+  if (meta.plausible === undefined) {
+    return;
+  }
+
+  const values = Array.isArray(predicate.value) ? predicate.value : [predicate.value as number];
+
+  for (const value of values) {
+    if (value < meta.plausible[0] || value > meta.plausible[1]) {
+      faults.push({
+        activity,
+        path,
+        message: `tests "${meta.code}" against ${value}, outside its plausible range [${meta.plausible[0]}, ${meta.plausible[1]}] in ${meta.unit}`,
+      });
+    }
+  }
 }
 
 function servesChannel(

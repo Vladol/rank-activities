@@ -268,6 +268,49 @@ describe('stage 5: a limiting feature multiplies the sum it does not join', () =
     });
   });
 
+  it('does not punish through a limiting feature whose policy is to exclude it', () => {
+    // The null-policy table of stage-five.md section 9 says a gate is
+    // *ignored* when excluded. Multiplying by a floor-plus-neutral factor
+    // would punish an absence, and would disagree with the breakdown, which
+    // reports the feature as contributing nothing.
+    const excluded = twoFeatureActivity({
+      features: [
+        {
+          id: 'warmth',
+          metric: 'temperature_2m',
+          unit: 'degC',
+          aggregation: { type: 'mean' },
+          normalizer: { type: 'linear', params: { from: 0, to: 20 } },
+          weight: 1,
+          nullPolicy: 'degrade',
+        },
+        {
+          id: 'thermalComfort',
+          role: 'gate',
+          gateFloor: 0.15,
+          metric: 'apparent_temperature',
+          unit: 'degC',
+          aggregation: { type: 'mean' },
+          normalizer: { type: 'trapezoid', params: { a: 2, b: 15, c: 25, d: 33 } },
+          nullPolicy: 'exclude',
+        },
+      ],
+    });
+    const { series, window } = oneDay({ temperature_2m: [20, 20, 20, 20] });
+    const outcome = scoreActivity(excluded, series, window, DEFAULT_PROFILE);
+
+    expect(outcome).toMatchObject({ kind: 'ranked', score: 100 });
+
+    if (outcome.kind !== 'ranked') {
+      return;
+    }
+
+    expect(outcome.breakdown.find((entry) => entry.featureId === 'thermalComfort')).toMatchObject({
+      status: 'excluded',
+      gateFactor: 1,
+    });
+  });
+
   it('does not punish through a limiting feature that has no data', () => {
     const { series, window } = oneDay(CALM_WARM);
     const outcome = scoreActivity(gated(), series, window, DEFAULT_PROFILE);

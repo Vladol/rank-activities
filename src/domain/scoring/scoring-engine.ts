@@ -361,9 +361,13 @@ export function normalizeAndCombine(
           };
 
     if (feature.role === 'gate') {
-      // No data is no punishment: a degraded gate is a factor of 1.
+      // No data is no punishment, whichever policy said so: a degraded gate is
+      // a factor of 1, and an excluded one is ignored entirely
+      // (stage-five.md, section 9, the null-policy table). Multiplying an
+      // absence by anything less would punish it, and would contradict the
+      // breakdown, which reports the feature as having contributed nothing.
       const factor =
-        entry.status === 'degraded'
+        entry.value === null
           ? clamp01(1)
           : clamp01((feature.gateFloor ?? 0) + (1 - (feature.gateFloor ?? 0)) * normalized);
 
