@@ -118,4 +118,34 @@
       Both vitest configs still load `test/setup/no-network.ts`, which fails any
       test that opens a non-loopback socket, and both runs above are green. The
       new layer adds no transport of its own: it wraps the ports `06` built.
-- [ ] 8.4 `/code-review` at level `high`, then `/opsx:archive`.
+- [x] 8.4 `/code-review` at level `high`, then `/opsx:archive`.
+
+      Seven findings, all fixed, each with a regression test that fails against
+      the code as reviewed:
+
+      1. **The background refresh never ran in production.** `revalidate()` was
+         the argument of `options.onRevalidate?.(...)`, so optional chaining
+         short-circuited it whenever the hook was absent — which is every
+         wiring but the tests'. After the lifetime, every answer was served
+         stale from the same entry until it expired outright. The refresh is
+         now started unconditionally and the hook only observes it.
+      2. **`maxAttempts` meant one attempt more than it said.** Cockatiel
+         counts retries; `maxAttempts: 3` made four calls and spent four
+         tokens. Ours counts attempts, because that is what the budget spends
+         and what `.env.example` documents, so it now passes `maxAttempts - 1`.
+      3. **`horizonKey` dropped `forecastDays` on the `pastDays` branch**,
+         where neither widening nor slicing applies — two different questions
+         shared one answer.
+      4. **The limits guard sat inside the wrapping**, so a horizon the source
+         would refuse cost a cache lookup and a unit of every budget window.
+         It is now outermost, which also removes the case where a warm entry
+         answered a request that a miss would have refused.
+      5. Same fix as 4.
+      6. **Neither decorator checked `expiresAt`.** Expiry was enforced only by
+         the memory adapter, though the contract puts it on the record — a
+         shared store with looser eviction would have served week-old data as
+         merely stale.
+      7. **A place name was truncated to 120 characters and the truncation was
+         the key**, so two names sharing a long prefix collided and the second
+         was answered with the first one's coordinates. Long names now carry a
+         digest, as the metric set already did.

@@ -225,6 +225,31 @@ describe('stale data is an answer, and it says how old it is', () => {
     expect(inner.requests).toHaveLength(2);
   });
 
+  it('refreshes in the background even when nothing is watching it', async () => {
+    // The hook is an observer. Making the refresh depend on it would mean the
+    // production wiring, which passes none, never revalidates at all — every
+    // answer stale from the same entry until it expired outright.
+    let now = START;
+    const inner = stubPort('forecast');
+    const cached = cacheSeriesPort(inner, {
+      cache: new MemoryCache({ maxEntries: 10, maxBytes: 100_000, now: () => now }),
+      lifetimes: LIFETIMES,
+      maxForecastDays: 7,
+      now: () => now,
+    });
+
+    await cached.fetch(request());
+    now += HOUR;
+    await cached.fetch(request());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(inner.requests).toHaveLength(2);
+
+    const next = await cached.fetch(request());
+
+    expect(next.ok && next.value.provenance[0]?.stale).toBe(false);
+  });
+
   it('treats data past the staleness limit as absent rather than as old', async () => {
     const { inner, cached, advance } = harness();
 
@@ -335,6 +360,49 @@ describe('a cache that cannot answer is a miss', () => {
     await cached.fetch(request());
 
     expect(inner.requests).toHaveLength(2);
+  });
+
+  it('does not serve an expired record a lax adapter still hands back', async () => {
+    // Expiry is on the record, so it is the caller's to enforce; an adapter
+    // that evicts loosely — or a shared store with its own idea of a TTL —
+    // must not turn into a week-old forecast served as merely stale.
+    let now = START;
+    const kept = new Map<string, Parameters<CachePort['set']>[1]>();
+    const lax: CachePort = {
+      name: 'lax',
+      get: (key) => Promise.resolve(kept.get(key)),
+      set: (key, record) => {
+        kept.set(key, record);
+
+        return Promise.resolve();
+      },
+      delete: (key) => {
+        kept.delete(key);
+
+        return Promise.resolve();
+      },
+      clear: () => {
+        kept.clear();
+
+        return Promise.resolve();
+      },
+    };
+    const inner = stubPort('forecast');
+    const cached = cacheSeriesPort(inner, {
+      cache: lax,
+      lifetimes: LIFETIMES,
+      maxForecastDays: 7,
+      now: () => now,
+    });
+
+    await cached.fetch(request());
+    inner.answer = () =>
+      Promise.resolve(err(domainError('TRANSPORT_FAILURE', 'the call never completed')));
+    now += 4 * HOUR;
+
+    const answer = await cached.fetch(request());
+
+    expect(answer.ok).toBe(false);
   });
 
   it('binds the null adapter to nothing but misses', async () => {

@@ -7,6 +7,8 @@ import { ok } from '../../domain/shared/result';
 import { validateEnv } from '../../config/env.schema';
 import type { Capability } from '../../domain/weather/metric';
 import { channel, createSeries } from '../../domain/weather/weather-series';
+import { CACHE, type CachePort } from '../../common/cache/cache.port';
+import { OutboundBudgetService } from './outbound-budget/outbound-budget.service';
 import { CAPABILITY_PORT_TOKENS, PLACE_LOOKUP_PORT } from './ports/tokens';
 import type { PlaceLookupPort } from './ports/place-lookup.port';
 import type { SeriesPort } from './ports/series.port';
@@ -135,6 +137,39 @@ describe('binding a source per capability', () => {
 
     expect(result.ok).toBe(false);
     expect(!result.ok && result.error.code).toBe('HORIZON_TOO_LARGE');
+  });
+
+  it('spends no outbound budget on a request the source would refuse', async () => {
+    // The limits guard sits outside the whole wrapping, so a horizon nobody
+    // could serve costs no cache lookup and no unit of any window. Charging
+    // for a call that was never going to be made is how legitimate traffic
+    // gets shed as PROVIDER_BUSY on a quota nothing actually spent.
+    const moduleRef = await compile(RECORDED);
+    const budget = moduleRef.get(OutboundBudgetService);
+    const bound = moduleRef.get<SeriesPort>(CAPABILITY_PORT_TOKENS.forecast);
+    const before = budget.remaining('day');
+
+    await bound.fetch({
+      capability: 'forecast',
+      location: { latitude: 38.72, longitude: -9.15 },
+      metrics: ['temperature_2m'],
+      horizon: { kind: 'forecast', forecastDays: 30 },
+      timezone: 'auto',
+    });
+
+    expect(budget.remaining('day')).toBe(before);
+  });
+
+  it('binds the null cache under test, so no fixture miss hides behind a hit', async () => {
+    const moduleRef = await compile(RECORDED, { NODE_ENV: 'test' });
+
+    expect(moduleRef.get<CachePort>(CACHE).name).toBe('null');
+  });
+
+  it('binds the memory cache outside test', async () => {
+    const moduleRef = await compile(RECORDED, { NODE_ENV: 'development' });
+
+    expect(moduleRef.get<CachePort>(CACHE).name).toBe('memory');
   });
 
   it('provides the metric planner', async () => {

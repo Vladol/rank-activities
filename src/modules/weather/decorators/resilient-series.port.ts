@@ -91,7 +91,10 @@ export function resilientSeriesPort<Served extends Capability>(
   const retrying = retry(
     handleWhenResult((result) => isFailure(result) && isRetryableFailure(result.error)),
     {
-      maxAttempts: options.maxAttempts,
+      // Cockatiel counts *retries*; ours counts attempts, first one included,
+      // because that is what the budget spends and what `.env.example`
+      // documents. Three attempts is two retries.
+      maxAttempts: Math.max(0, options.maxAttempts - 1),
       backoff: new DelegateBackoff<IRetryBackoffContext<unknown>>((context) =>
         retryDelayMs(context.attempt, failureIn(context.result), options.backoff),
       ),

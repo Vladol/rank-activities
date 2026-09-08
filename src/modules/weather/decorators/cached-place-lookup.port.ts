@@ -58,7 +58,11 @@ export function cachePlaceLookup(
       const key = placeKey(query);
       const stored = await options.cache.get(key);
 
-      if (stored !== undefined) {
+      // Freshness and expiry are the same moment for a name, and both are
+      // checked here rather than left to the adapter: the contract puts them
+      // on the record, and an adapter that evicts more loosely must not turn
+      // into a lookup that never refreshes.
+      if (stored !== undefined && now() < stored.freshUntil && now() < stored.expiresAt) {
         const cached = decode(stored.payload);
 
         if (cached !== undefined) {

@@ -106,12 +106,16 @@ export function gridKey(location: Coordinates): string {
  * only in whether an accent is one code point or two.
  */
 export function normalisePlaceName(name: string): string {
-  return name
-    .normalize('NFC')
-    .trim()
-    .replace(/\s+/gu, ' ')
-    .toLowerCase()
-    .slice(0, MAX_PLACE_NAME_LENGTH);
+  const folded = name.normalize('NFC').trim().replace(/\s+/gu, ' ').toLowerCase();
+
+  if (folded.length <= MAX_PLACE_NAME_LENGTH) {
+    return folded;
+  }
+
+  // Truncation alone would make two names that share a long prefix into one
+  // entry, and the second would be answered with the first one's coordinates.
+  // The prefix stays for readability in a log; the digest keeps them apart.
+  return `${folded.slice(0, MAX_PLACE_NAME_LENGTH - 13)}#${digest(folded)}`;
 }
 
 /**
@@ -121,15 +125,27 @@ export function normalisePlaceName(name: string): string {
  */
 function metricsKey(metrics: readonly MetricCode[]): string {
   const unique = [...new Set(metrics)].toSorted();
-  const digest = createHash('sha1').update(unique.join(',')).digest('hex').slice(0, 12);
 
-  return `${unique.length}-${digest}`;
+  return `${unique.length}-${digest(unique.join(','))}`;
 }
 
+function digest(value: string): string {
+  return createHash('sha1').update(value).digest('hex').slice(0, 12);
+}
+
+/**
+ * A rolling horizon contributes nothing, because the maximum is always fetched
+ * and the answer sliced locally — *except* when history is prepended. Days of
+ * history move the origin of the axis, so neither the widening nor the slicing
+ * applies, and the length has to be part of the key or two different questions
+ * would share one answer.
+ */
 function horizonKey(horizon: Horizon): string {
   if (horizon.kind === 'window') {
     return `w${horizon.startDate}_${horizon.endDate}`;
   }
 
-  return horizon.pastDays === undefined || horizon.pastDays === 0 ? 'f' : `f-p${horizon.pastDays}`;
+  return horizon.pastDays === undefined || horizon.pastDays === 0
+    ? 'f'
+    : `f${horizon.forecastDays}-p${horizon.pastDays}`;
 }

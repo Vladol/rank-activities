@@ -171,14 +171,16 @@ export class WeatherModule {
           );
         }
 
-        // Every bound port checks the request against its own declared limits
-        // before anything leaves the process, and every one of them is then
-        // wrapped by the same factory: cache, deduplication, breaker, retry,
-        // budget and metrics are never written into an adapter
-        // (`decorators/wrap-source.ts`).
+        // Every bound port is wrapped by the same factory — cache,
+        // deduplication, breaker, retry, budget and metrics are never written
+        // into an adapter (`decorators/wrap-source.ts`) — and the limits guard
+        // sits outside all of it. A request the source would refuse costs no
+        // cache lookup and, more importantly, no unit of the outbound budget:
+        // shedding legitimate traffic to pay for a call that was never going
+        // to be made is the opposite of what the budget is for.
         return {
           ...result,
-          ports: result.ports.map((port) => wrapSource(guardLimits(port), wrapped)),
+          ports: result.ports.map((port) => guardLimits(wrapSource(port, wrapped))),
         };
       },
     };

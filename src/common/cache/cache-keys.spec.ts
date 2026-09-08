@@ -58,6 +58,14 @@ describe('the series key', () => {
     );
   });
 
+  // Widening and slicing are both skipped when history is prepended, so the
+  // length has to come back into the key or two questions share one answer.
+  it('separates two horizons when history is prepended', () => {
+    expect(key(['temperature_2m'], { kind: 'forecast', forecastDays: 3, pastDays: 2 })).not.toBe(
+      key(['temperature_2m'], { kind: 'forecast', forecastDays: 7, pastDays: 2 }),
+    );
+  });
+
   it('separates the capabilities', () => {
     const base = { location: LISBON, metrics: ['temperature_2m' as MetricCode], horizon: FORECAST, timezone: 'UTC' };
 
@@ -109,7 +117,16 @@ describe('the place key', () => {
   });
 
   it('bounds the length of a name that becomes a key', () => {
-    expect(normalisePlaceName('x'.repeat(500))).toHaveLength(120);
+    expect(normalisePlaceName('x'.repeat(500)).length).toBeLessThanOrEqual(120);
+  });
+
+  it('keeps two long names apart instead of truncating them together', () => {
+    // Truncation alone would answer the second name with the first one's
+    // coordinates, which is a wrong place rather than a slow one.
+    const prefix = 'a'.repeat(200);
+
+    expect(normalisePlaceName(`${prefix}-north`)).not.toBe(normalisePlaceName(`${prefix}-south`));
+    expect(placeKey({ name: `${prefix}-north` })).not.toBe(placeKey({ name: `${prefix}-south` }));
   });
 
   it('separates two languages, which answer with different names', () => {

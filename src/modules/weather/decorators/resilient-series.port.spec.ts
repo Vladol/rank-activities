@@ -81,6 +81,30 @@ describe('the budget counts what actually leaves', () => {
     expect(budget.remaining('day')).toBe(9_997);
   });
 
+  it('makes exactly as many attempts as it was configured for', async () => {
+    // Cockatiel counts retries and this option counts attempts, so the two
+    // differ by one. Off by one here means every logical call costs a token
+    // more than the budget was sized for.
+    for (const [maxAttempts, expected] of [
+      [1, 1],
+      [2, 2],
+      [3, 3],
+    ]) {
+      const budget = new OutboundBudgetService({
+        limits: { minute: 600, hour: 5_000, day: 10_000 },
+      });
+      const { inner, port } = wrapped('forecast', { budget, maxAttempts });
+
+      inner.answer = () =>
+        Promise.resolve(err(domainError('TRANSPORT_FAILURE', 'the call never completed')));
+
+      await port.fetch(REQUEST);
+
+      expect(inner.requests, `maxAttempts ${maxAttempts}`).toHaveLength(expected as number);
+      expect(budget.remaining('day')).toBe(10_000 - (expected as number));
+    }
+  });
+
   it('answers a spent budget without waiting for it to refill', async () => {
     const budget = new OutboundBudgetService({ limits: { minute: 1, hour: 5_000, day: 10_000 } });
     const { inner, port } = wrapped('forecast', { budget });

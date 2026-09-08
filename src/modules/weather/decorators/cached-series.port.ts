@@ -95,10 +95,15 @@ export function cacheSeriesPort<Served extends Capability>(
       });
 
       const stored = await options.cache.get(key);
-      const cached = stored === undefined ? undefined : decode(stored.payload);
+      // Expiry is checked here as well as by the adapter: the contract says a
+      // record past `expiresAt` is not servable, and a caller that relied on
+      // the adapter to enforce it would start serving week-old forecasts the
+      // day a store with looser eviction is bound.
+      const live = stored !== undefined && now() < stored.expiresAt ? stored : undefined;
+      const cached = live === undefined ? undefined : decode(live.payload);
 
-      if (stored !== undefined && cached !== undefined) {
-        if (now() < stored.freshUntil) {
+      if (live !== undefined && cached !== undefined) {
+        if (now() < live.freshUntil) {
           record('hit');
 
           return { ok: true, value: answer(cached, request, false) };
@@ -107,8 +112,14 @@ export function cacheSeriesPort<Served extends Capability>(
         // Stale, and served as an answer rather than as a failure: the data is
         // there, it is old, and the answer says so with the moment it was
         // obtained (spec, "Stale data is served as an answer").
+        //
+        // The refresh is started unconditionally and the hook only observes
+        // it: starting it inside `onRevalidate?.(...)` would make the whole
+        // mechanism depend on a hook nothing but the tests passes.
         record('stale');
-        options.onRevalidate?.(revalidate(flight, key, outbound, obtain));
+        const refreshing = revalidate(flight, key, outbound, obtain);
+
+        options.onRevalidate?.(refreshing);
 
         return { ok: true, value: answer(cached, request, true) };
       }
