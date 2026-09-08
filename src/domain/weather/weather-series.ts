@@ -90,6 +90,26 @@ export function createSeries(input: {
   };
 }
 
+/**
+ * The same series, with every contribution declaring whether it is stale.
+ *
+ * Staleness is a property of when the data was obtained rather than of the
+ * data, so it is stamped on the provenance and nowhere else: `fetchedAt` stays
+ * the honest moment the source answered, which is what makes a stale answer
+ * readable instead of merely marked.
+ */
+export function markStale(series: WeatherSeries, stale: boolean): WeatherSeries {
+  if (series.provenance.every((entry) => entry.stale === stale)) {
+    return series;
+  }
+
+  return {
+    hourly: series.hourly,
+    daily: series.daily,
+    provenance: series.provenance.map((entry) => ({ ...entry, stale })),
+  };
+}
+
 export function hasMetric(target: SeriesChannel, code: MetricCode): boolean {
   return target.values[code] !== undefined;
 }
