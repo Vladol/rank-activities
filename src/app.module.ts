@@ -8,6 +8,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { AppResolver } from './app.resolver';
 import { AppService } from './app.service';
 import { validateEnv } from './config/env.schema';
+import { ActivitiesModule } from './modules/activities/activities.module';
 import { HealthModule } from './modules/health/health.module';
 import { WeatherModule } from './modules/weather/weather.module';
 
@@ -23,6 +24,10 @@ import { WeatherModule } from './modules/weather/weather.module';
       graphiql: process.env.NODE_ENV !== 'production',
     }),
     HealthModule,
+    // The catalogue and the scoring profile, both read from disk at startup and
+    // both fatal when invalid: an activity is data, and data that cannot be
+    // trusted stops the start rather than surfacing as a wrong number later.
+    ActivitiesModule,
     // Binds a source per capability and for place lookup, and refuses to start
     // when the configured source has no implementation. The default is the
     // recorded sources, which read fixtures and never open a socket

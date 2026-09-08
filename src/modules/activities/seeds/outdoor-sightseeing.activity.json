@@ -1,0 +1,68 @@
+{
+  "code": "outdoor-sightseeing",
+  "version": 1,
+  "titleKey": "activity.outdoorSightseeing",
+  "include": ["shared:severe-weather", "shared:no-daylight"],
+  "applicability": [],
+  "constraints": [],
+  "features": [
+    {
+      "id": "thermalComfort",
+      "role": "gate",
+      "gateFloor": 0.15,
+      "metric": "apparent_temperature",
+      "unit": "degC",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "trapezoid", "params": { "a": 2, "b": 15, "c": 25, "d": 33 } },
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "dryHours",
+      "metric": "precipitation",
+      "unit": "mm",
+      "aggregation": {
+        "type": "shareOfHours",
+        "params": { "predicate": { "op": "lt", "value": 0.1 }, "window": "daylight" }
+      },
+      "normalizer": { "type": "linear", "params": { "from": 0.4, "to": 1.0 } },
+      "weight": 0.34,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "sunshine",
+      "metric": "sunshine_duration",
+      "unit": "second",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "linear", "params": { "from": 600, "to": 3000 } },
+      "weight": 0.2,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "visibility",
+      "metric": "visibility",
+      "unit": "km",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "linear", "params": { "from": 1, "to": 15 } },
+      "weight": 0.16,
+      "nullPolicy": "exclude"
+    },
+    {
+      "id": "wind",
+      "metric": "wind_speed_10m",
+      "unit": "m/s",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "inverse", "params": { "from": 5, "to": 14 } },
+      "weight": 0.16,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "daylight",
+      "metric": "daylight_duration",
+      "unit": "second",
+      "aggregation": { "type": "identity" },
+      "normalizer": { "type": "linear", "params": { "from": 14400, "to": 36000 } },
+      "weight": 0.14,
+      "nullPolicy": "degrade"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "id": "default",
+  "version": 1,
+  "gapThreshold": 0.3,
+  "neutralScore": 0.5
+}

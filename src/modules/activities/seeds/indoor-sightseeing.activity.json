@@ -1,0 +1,38 @@
+{
+  "code": "indoor-sightseeing",
+  "version": 1,
+  "titleKey": "activity.indoorSightseeing",
+  "include": ["shared:severe-weather"],
+  "applicability": [],
+  "constraints": [],
+  "postprocess": { "floor": 40, "ceiling": 85 },
+  "features": [
+    {
+      "id": "rainHours",
+      "metric": "precipitation_hours",
+      "unit": "hour",
+      "aggregation": { "type": "identity" },
+      "normalizer": { "type": "linear", "params": { "from": 0, "to": 12 } },
+      "weight": 0.4,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "discomfort",
+      "metric": "apparent_temperature",
+      "unit": "degC",
+      "aggregation": { "type": "mean" },
+      "normalizer": { "type": "inverseGaussian", "params": { "center": 20, "sigma": 9 } },
+      "weight": 0.45,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "wind",
+      "metric": "wind_speed_10m",
+      "unit": "m/s",
+      "aggregation": { "type": "max" },
+      "normalizer": { "type": "linear", "params": { "from": 3, "to": 15 } },
+      "weight": 0.15,
+      "nullPolicy": "degrade"
+    }
+  ]
+}

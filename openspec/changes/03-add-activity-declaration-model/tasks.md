@@ -71,29 +71,29 @@
       under two profiles yields two results each naming its profile.
 - [x] 3.8 Test determinism: two evaluations of the same inputs are identical, explanation
       ordering included.
-- [ ] 3.9 Reproduce the two reference cases that motivated limiting features: "Dubai, +45 °C
+- [x] 3.9 Reproduce the two reference cases that motivated limiting features: "Dubai, +45 °C
       and clear" and "London, rain all week" must both rank indoor above outdoor with one
       set of weights.
 
 ## 4. Catalogue and seeds
 
-- [ ] 4.1 Add the catalogue port and an in-memory registry loading the seed declarations at
+- [x] 4.1 Add the catalogue port and an in-memory registry loading the seed declarations at
       startup; test that the set of rankable activities equals the set of active
       declarations.
-- [ ] 4.2 Write `shared-rules.json` with the severe-weather and no-daylight constraints of
+- [x] 4.2 Write `shared-rules.json` with the severe-weather and no-daylight constraints of
       stage 5 §5.6.
-- [ ] 4.3 Write the four seed declarations verbatim from stage 5 §6, and the `default@1`
+- [x] 4.3 Write the four seed declarations verbatim from stage 5 §6, and the `default@1`
       scoring profile carrying the gap threshold and the neutral value.
-- [ ] 4.4 Verify the indoor declaration expresses its inversion, floor and ceiling with no
+- [x] 4.4 Verify the indoor declaration expresses its inversion, floor and ceiling with no
       indoor-specific code anywhere.
-- [ ] 4.5 Add a fifth throwaway declaration, confirm it is ranked with zero code changes,
+- [x] 4.5 Add a fifth throwaway declaration, confirm it is ranked with zero code changes,
       then delete it and record the result in the change notes.
-- [ ] 4.6 Record the golden snapshot of scores across all fixtures; from here on a weight
+- [x] 4.6 Record the golden snapshot of scores across all fixtures; from here on a weight
       change is reviewed by its delta.
 
 ## 5. Close-out
 
-- [ ] 5.1 Assert by test or lint rule that no file under `src/domain/scoring/` or
+- [x] 5.1 Assert by test or lint rule that no file under `src/domain/scoring/` or
       `src/modules/` is named after an activity.
-- [ ] 5.2 Run `npm run lint`, `npm test`, `npx tsc --noEmit` and paste the output.
+- [x] 5.2 Run `npm run lint`, `npm test`, `npx tsc --noEmit` and paste the output.
 - [ ] 5.3 `/code-review` at level `high`, then `/opsx:archive`.

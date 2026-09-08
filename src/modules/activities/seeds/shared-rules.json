@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "rules": {
+    "severe-weather": {
+      "reason": "SEVERE_WEATHER",
+      "when": {
+        "anyOf": [
+          {
+            "metric": "weather_code",
+            "unit": "wmo_code",
+            "aggregation": {
+              "type": "countIf",
+              "params": { "predicate": { "op": "in", "value": [95, 96] }, "window": "day" }
+            },
+            "op": "gte",
+            "value": 1
+          },
+          {
+            "metric": "wind_gusts_10m",
+            "unit": "m/s",
+            "aggregation": { "type": "max" },
+            "op": "gte",
+            "value": 25
+          }
+        ]
+      }
+    },
+    "no-daylight": {
+      "reason": "NO_DAYLIGHT",
+      "when": {
+        "metric": "daylight_duration",
+        "unit": "second",
+        "aggregation": { "type": "identity" },
+        "op": "lte",
+        "value": 0
+      }
+    }
+  }
+}

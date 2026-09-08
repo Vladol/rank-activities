@@ -1,0 +1,75 @@
+{
+  "code": "ski",
+  "version": 1,
+  "titleKey": "activity.ski",
+  "include": ["shared:severe-weather", "shared:no-daylight"],
+  "applicability": [{ "rule": "snowSeason", "params": { "minColdMonthSnowfallCm": 20 } }],
+  "constraints": [
+    {
+      "reason": "NO_SNOW_COVER",
+      "when": {
+        "metric": "snow_depth",
+        "unit": "m",
+        "aggregation": { "type": "max" },
+        "op": "lt",
+        "value": 0.1
+      }
+    }
+  ],
+  "features": [
+    {
+      "id": "snowDepth",
+      "metric": "snow_depth",
+      "unit": "m",
+      "aggregation": { "type": "max" },
+      "normalizer": { "type": "trapezoid", "params": { "a": 0.1, "b": 0.4, "c": 2.0, "d": 4.0 } },
+      "weight": 0.28,
+      "nullPolicy": "fail"
+    },
+    {
+      "id": "freshSnow",
+      "metric": "FRESH_COLD_SNOWFALL",
+      "unit": "cm",
+      "aggregation": { "type": "sum" },
+      "normalizer": { "type": "linear", "params": { "from": 0, "to": 20 } },
+      "weight": 0.16,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "temperature",
+      "metric": "temperature_2m",
+      "unit": "degC",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "trapezoid", "params": { "a": -20, "b": -8, "c": -2, "d": 4 } },
+      "weight": 0.22,
+      "nullPolicy": "fail"
+    },
+    {
+      "id": "freezingMargin",
+      "metric": "FREEZING_LEVEL_MARGIN",
+      "unit": "m",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "inverse", "params": { "from": -300, "to": 300 } },
+      "weight": 0.1,
+      "nullPolicy": "exclude"
+    },
+    {
+      "id": "gusts",
+      "metric": "wind_gusts_10m",
+      "unit": "m/s",
+      "aggregation": { "type": "max" },
+      "normalizer": { "type": "inverse", "params": { "from": 8, "to": 17 } },
+      "weight": 0.14,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "visibility",
+      "metric": "visibility",
+      "unit": "km",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "linear", "params": { "from": 0.2, "to": 5 } },
+      "weight": 0.1,
+      "nullPolicy": "exclude"
+    }
+  ]
+}

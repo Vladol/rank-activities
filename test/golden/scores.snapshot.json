@@ -1,0 +1,1847 @@
+{
+  "prague-inland / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 95,
+      "top": "dryHours",
+      "gate": 0.951
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "prague-inland / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 58,
+      "top": "visibility",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "prague-inland / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "prague-inland / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "prague-inland / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "prague-inland / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "prague-inland / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "lisbon-surf / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 64,
+      "top": "wavePeriod"
+    }
+  },
+  "lisbon-surf / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "wind"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 47,
+      "top": "waveHeight"
+    }
+  },
+  "lisbon-surf / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "wind"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 0.9982
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 49,
+      "top": "waveHeight"
+    }
+  },
+  "lisbon-surf / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 76,
+      "top": "dryHours",
+      "gate": 0.7592
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 38,
+      "top": "windSpeed"
+    }
+  },
+  "lisbon-surf / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "dryHours",
+      "gate": 0.5042
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 56,
+      "top": "wavePeriod"
+    }
+  },
+  "lisbon-surf / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 63,
+      "top": "dryHours",
+      "gate": 0.6343
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 62,
+      "top": "wavePeriod"
+    }
+  },
+  "lisbon-surf / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 90,
+      "top": "dryHours",
+      "gate": 0.9017
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 52,
+      "top": "wavePeriod"
+    }
+  },
+  "chamonix-winter-ski / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 76,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 13,
+      "top": "wind",
+      "gate": 0.3069,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 35,
+      "top": "snowDepth",
+      "excluded": [
+        "freezingMargin",
+        "visibility"
+      ]
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-winter-ski / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 79,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 6,
+      "top": "wind",
+      "gate": 0.1711,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 35,
+      "top": "snowDepth",
+      "excluded": [
+        "freezingMargin",
+        "visibility"
+      ]
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-winter-ski / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 82,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 5,
+      "top": "wind",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 61,
+      "top": "snowDepth",
+      "excluded": [
+        "freezingMargin",
+        "visibility"
+      ]
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-winter-ski / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 82,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 5,
+      "top": "wind",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 65,
+      "top": "snowDepth",
+      "excluded": [
+        "freezingMargin",
+        "visibility"
+      ]
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-winter-ski / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 15,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 80,
+      "top": "snowDepth",
+      "excluded": [
+        "freezingMargin",
+        "visibility"
+      ]
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-winter-ski / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 15,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 80,
+      "top": "snowDepth",
+      "excluded": [
+        "freezingMargin",
+        "visibility"
+      ]
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-winter-ski / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 15,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 66,
+      "top": "snowDepth",
+      "excluded": [
+        "freezingMargin",
+        "visibility"
+      ]
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-summer / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 63,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 36,
+      "top": "sunshine",
+      "gate": 0.6363,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-summer / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 93,
+      "top": "dryHours",
+      "gate": 0.9334,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-summer / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-summer / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 92,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-summer / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 79,
+      "top": "sunshine",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-summer / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 66,
+      "top": "sunshine",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "chamonix-summer / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 70,
+      "top": "sunshine",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "quito-highland / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 86,
+      "top": "dryHours",
+      "gate": 0.8632,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "quito-highland / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 79,
+      "top": "dryHours",
+      "gate": 0.7935,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "quito-highland / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 62,
+      "top": "dryHours",
+      "gate": 0.7771,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "quito-highland / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 82,
+      "top": "dryHours",
+      "gate": 0.8153,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "quito-highland / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 44,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 49,
+      "top": "wind",
+      "gate": 0.7886,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "quito-highland / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 64,
+      "top": "dryHours",
+      "gate": 0.7145,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "quito-highland / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 87,
+      "top": "dryHours",
+      "gate": 0.8714,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "tromso-polar-night / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 69,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    }
+  },
+  "tromso-polar-night / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 74,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    }
+  },
+  "tromso-polar-night / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    }
+  },
+  "tromso-polar-night / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    }
+  },
+  "tromso-polar-night / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    }
+  },
+  "tromso-polar-night / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    }
+  },
+  "tromso-polar-night / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 51,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_DAYLIGHT"
+    }
+  },
+  "queenstown-nz-ski / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 53,
+      "top": "dryHours",
+      "gate": 0.534
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "queenstown-nz-ski / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 63,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 34,
+      "top": "sunshine",
+      "gate": 0.4787
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "queenstown-nz-ski / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 70,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 11,
+      "top": "sunshine",
+      "gate": 0.15
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "queenstown-nz-ski / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 68,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 18,
+      "top": "visibility",
+      "gate": 0.3434
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "queenstown-nz-ski / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 73,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 18,
+      "top": "wind",
+      "gate": 0.3216
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "queenstown-nz-ski / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 54,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 44,
+      "top": "dryHours",
+      "gate": 0.5194
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "queenstown-nz-ski / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 63,
+      "top": "dryHours",
+      "gate": 0.6279
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "london-rainy / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 49,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 48,
+      "top": "wind",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "london-rainy / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 92,
+      "top": "dryHours",
+      "gate": 0.9678
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "london-rainy / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 91,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "london-rainy / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 43,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 69,
+      "top": "sunshine",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "london-rainy / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 100,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "london-rainy / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 87,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "london-rainy / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 40,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 96,
+      "top": "dryHours",
+      "gate": 1
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "dubai-heat / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 47,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 15,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "dubai-heat / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 44,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 15,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "dubai-heat / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 43,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 14,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "dubai-heat / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 46,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 14,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "dubai-heat / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 46,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 15,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "dubai-heat / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 15,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "dubai-heat / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 45,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 15,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "storm-gusts / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 67,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 20,
+      "top": "sunshine",
+      "gate": 0.3476,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "storm-gusts / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 41,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 30,
+      "top": "dryHours",
+      "gate": 0.3374,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "storm-gusts / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 85,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 9,
+      "top": "dryHours",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "storm-gusts / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "SEVERE_WEATHER"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "SEVERE_WEATHER"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "SEVERE_WEATHER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "SEVERE_WEATHER"
+    }
+  },
+  "storm-gusts / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 81,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 6,
+      "top": "wind",
+      "gate": 0.15,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "storm-gusts / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "SEVERE_WEATHER"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "SEVERE_WEATHER"
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "SEVERE_WEATHER"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "SEVERE_WEATHER"
+    }
+  },
+  "storm-gusts / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 85,
+      "top": "rainHours"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 18,
+      "top": "wind",
+      "gate": 0.3701,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "NO_SNOW_COVER"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "marine-odessa-flat / day 0": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "marine-odessa-flat / day 1": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "marine-odessa-flat / day 2": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "marine-odessa-flat / day 3": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    },
+    "surfing": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    }
+  },
+  "marine-odessa-flat / day 4": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "FLAT_SEA"
+    }
+  },
+  "marine-odessa-flat / day 5": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "FLAT_SEA"
+    }
+  },
+  "marine-odessa-flat / day 6": {
+    "indoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "discomfort"
+    },
+    "outdoor-sightseeing": {
+      "kind": "ranked",
+      "score": 50,
+      "top": "dryHours",
+      "gate": 1,
+      "excluded": [
+        "visibility"
+      ]
+    },
+    "ski": {
+      "kind": "no_data",
+      "reason": "MISSING_REQUIRED_METRIC"
+    },
+    "surfing": {
+      "kind": "ranked",
+      "score": 0,
+      "reason": "FLAT_SEA"
+    }
+  }
+}

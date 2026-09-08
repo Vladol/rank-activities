@@ -1,0 +1,76 @@
+{
+  "code": "surfing",
+  "version": 1,
+  "titleKey": "activity.surfing",
+  "include": ["shared:severe-weather", "shared:no-daylight"],
+  "applicability": [{ "rule": "marineCoverage", "params": { "confirmations": 2 } }],
+  "constraints": [
+    {
+      "reason": "FLAT_SEA",
+      "when": {
+        "metric": "wave_height",
+        "unit": "m",
+        "aggregation": { "type": "max" },
+        "op": "lt",
+        "value": 0.4
+      }
+    },
+    {
+      "reason": "DANGEROUS_SURF",
+      "when": {
+        "metric": "wave_height",
+        "unit": "m",
+        "aggregation": { "type": "max" },
+        "op": "gte",
+        "value": 4.0
+      }
+    }
+  ],
+  "features": [
+    {
+      "id": "waveHeight",
+      "metric": "wave_height",
+      "unit": "m",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "max" } },
+      "normalizer": { "type": "trapezoid", "params": { "a": 0.4, "b": 1.0, "c": 2.5, "d": 4.0 } },
+      "weight": 0.34,
+      "nullPolicy": "fail"
+    },
+    {
+      "id": "wavePeriod",
+      "metric": "wave_period",
+      "unit": "second",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "trapezoid", "params": { "a": 5, "b": 8, "c": 16, "d": 20 } },
+      "weight": 0.22,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "windAlignment",
+      "metric": "WIND_WAVE_ALIGNMENT",
+      "unit": "degree",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "linear", "params": { "from": 60, "to": 150 } },
+      "weight": 0.2,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "windSpeed",
+      "metric": "wind_speed_10m",
+      "unit": "m/s",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "inverse", "params": { "from": 4, "to": 12 } },
+      "weight": 0.14,
+      "nullPolicy": "degrade"
+    },
+    {
+      "id": "waterComfort",
+      "metric": "sea_surface_temperature",
+      "unit": "degC",
+      "aggregation": { "type": "daylightWindow", "params": { "reduce": "mean" } },
+      "normalizer": { "type": "linear", "params": { "from": 8, "to": 20 } },
+      "weight": 0.1,
+      "nullPolicy": "exclude"
+    }
+  ]
+}
