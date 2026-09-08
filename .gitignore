@@ -1,5 +1,7 @@
 # compiled output
 /dist
+# the deploy scripts, compiled by `npm run build` (tsconfig.scripts.json)
+/dist-scripts
 /node_modules
 *.tsbuildinfo
 

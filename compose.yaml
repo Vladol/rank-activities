@@ -1,0 +1,119 @@
+name: rank-activities
+
+# The stack in three services: the store, the deploy step that prepares it, and
+# the service. There is deliberately no Redis: the cache port has a `memory` and
+# a `null` adapter and nothing else, `REDIS_URL` is read by no code, and
+# stage-six.md records "Redis immediately" as a rejected alternative — one more
+# service for a single instance. It arrives with the adapter that would use it.
+
+# What both containers of the application are given. The values a developer may
+# want to change come from `.env` through substitution; the two that must not
+# are fixed here.
+x-app-environment: &app-environment
+  NODE_ENV: ${NODE_ENV:-development}
+
+  # Not taken from `.env`: `localhost` in this network means the container
+  # itself, and the store is another service. Change the credentials through
+  # POSTGRES_* below, which the database container reads from the same values.
+  DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-rank_activities}
+
+  # The point of running with a database: the rules are read from the versions
+  # published into it, not from the files. It requires the publication step
+  # below — an empty store has no rules to serve.
+  ACTIVITY_CATALOGUE_SOURCE: store
+
+  WEATHER_PROVIDER: ${WEATHER_PROVIDER:-open-meteo}
+
+  # Fixed, and mapped to a host port separately: a PORT in someone's `.env`
+  # would otherwise move the listener without moving the published port.
+  PORT: 3000
+
+# The local `.env` is read first, so every other setting in it — cache
+# lifetimes, the outbound budget, the inbound limit — reaches the containers
+# unchanged. `environment` above is applied after it and wins where they meet.
+x-app-env-file: &app-env-file
+  - path: .env
+    required: false
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-rank_activities}
+    ports:
+      # Published only so that psql from the host can look inside; the API
+      # reaches the store over the compose network and does not need it. 5433 by
+      # default rather than 5432, because a developer machine very often already
+      # has a PostgreSQL on the standard port, and a port collision is a worse
+      # first run than an unusual number in one documented command.
+      - '${POSTGRES_HOST_PORT:-5433}:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      # Every other service waits on this, so it answers the only question that
+      # matters: does the database accept connections to that database, not is
+      # the process up.
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-rank_activities}']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  # The deploy step, as its own container that runs to completion and stops.
+  #
+  # It is not the API's entrypoint, and that is the whole point: the service
+  # verifies the schema and refuses to start against one it does not recognise,
+  # but it never migrates (ADR 0003). Several instances starting at once
+  # therefore perform no schema change between them, and a failed migration is a
+  # failed deploy rather than a crash loop.
+  #
+  # All three steps are idempotent — migrations by their journal, publication by
+  # (code, version), partitions by `ensure_audit_partition` — so this runs on
+  # every `up`, not only the first, and the second run is a no-op.
+  migrate:
+    build:
+      context: .
+    image: rank-activities:local
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: *app-env-file
+    environment: *app-environment
+    command: sh -c 'npm run db:migrate && npm run db:seed && npm run db:partitions'
+    restart: 'no'
+
+  api:
+    build:
+      context: .
+    image: rank-activities:local
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        # The API starts only after the migration and the publication succeeded.
+        # A non-zero exit here stops the stack instead of starting a service
+        # that would exit on its own schema check a second later.
+        condition: service_completed_successfully
+    env_file: *app-env-file
+    environment: *app-environment
+    ports:
+      - '${API_HOST_PORT:-3000}:3000'
+    # Deliberately no restart policy: a fatal environment or schema error should
+    # be visible at once, not hidden inside a restart loop. The environment is
+    # validated at startup and the process exits non-zero when it is wrong.
+    healthcheck:
+      # Readiness, not liveness: it answers 503 until the schema is at head, so
+      # "healthy" means the service can actually serve, not merely that it
+      # bound a port. `wget` is busybox's, already in the image.
+      test: ['CMD-SHELL', 'wget --quiet --spider http://127.0.0.1:3000/health/ready || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  db-data:

@@ -1,0 +1,30 @@
+# What never belongs in a build context.
+#
+# node_modules above all: the image installs its own from the lockfile, and a
+# host copy would carry this machine's platform binaries into a Linux image.
+node_modules
+dist
+dist-scripts
+coverage
+*.tsbuildinfo
+
+# The local environment is configuration, not code. It reaches a container
+# through compose, never baked into a layer: an image carrying someone's
+# DATABASE_URL is an image that cannot be published.
+.env
+.env.local
+
+.git
+.github
+.claude
+logs
+*.log
+.DS_Store
+
+# Prose, specifications and the suites. None of them is read at runtime, and
+# each one invalidates a layer when it changes.
+docs
+openspec
+test
+README.md
+CLAUDE.md

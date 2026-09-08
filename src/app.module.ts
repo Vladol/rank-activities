@@ -22,7 +22,16 @@ import { WeatherModule } from './modules/weather/weather.module';
 @Module({
   imports: [
     // Validate the environment at startup: a bad env kills the process immediately.
-    ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateEnv }),
+    // Under NODE_ENV=test the `.env` file is not read at all: the suite runs on
+    // recorded fixtures behind the socket guard, and a developer who points
+    // their own `.env` at the live API must not turn that suite red — or, worse,
+    // green against a third party.
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+      validate: validateEnv,
+      ignoreEnvFile: process.env.NODE_ENV === 'test',
+    }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       inject: [ConfigService],

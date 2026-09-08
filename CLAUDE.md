@@ -28,10 +28,18 @@ npm run test:e2e                 # e2e
 npm run test:integration         # PostgreSQL in a container; the only suite needing one
 npx tsc --noEmit                 # types
 
+docker compose up -d --build     # the whole stack: API + PostgreSQL, migrated and seeded
+docker compose down -v           # stop and drop the volume; the next up is a first run
+
+npm run build                    # required before the three below: they run dist-scripts/
 npm run db:migrate               # deploy step. The service never migrates itself.
 npm run db:seed                  # publishes registries, rule versions, demo profiles
 npm run db:partitions            # keeps a year of audit partitions provisioned ahead
 ```
+
+The deploy steps run compiled output rather than `scripts/*.ts`: Node reads a `.ts`
+file as ESM when it sees `import`, and ESM needs an extension on every relative
+specifier, which this codebase does not write ([ADR 0009](docs/adr/0009-docker-compose-stack.md)).
 
 ## Hard rules
 
@@ -71,8 +79,9 @@ npm run db:partitions            # keeps a year of audit partitions provisioned 
   the series. The whole map is
   [docs/investigation/data-model.md](docs/investigation/data-model.md).
 - **The service verifies the schema and never migrates itself.** Migration is a
-  deploy step (`npm run db:migrate`); at startup the service checks the schema is
-  at head and exits non-zero if it is not. Reference data and rule versions
+  deploy step (`npm run db:migrate`, its own one-shot container in
+  `compose.yaml`); at startup the service checks the schema is at head and exits
+  non-zero if it is not. Reference data and rule versions
   arrive by publication (`npm run db:seed`), never by migration.
 - **A published version of the rules is immutable.** Publication is idempotent by
   `(code, version)`; different content under a version that already exists fails
@@ -144,7 +153,8 @@ src/modules/weather/decorators/          # the one wrapping factory: observed, c
 src/modules/weather/outbound-budget/     # token buckets over three windows, counted in attempts
 src/modules/weather/adapters/mock/       # recorded sources, fixture registry, rebaser, fixtures
 src/modules/weather/adapters/open-meteo/ # zod schema and raw->domain mapper, shared with the live client
-scripts/           # record-fixture.ts: the only supported way to add a fixture
+scripts/           # record-fixture.ts (the only supported way to add a fixture); the deploy steps
+Dockerfile         # one image for the API and for the deploy steps; compose.yaml wires the stack
 test/setup/        # no-network.ts, loaded by both vitest configs
 test/integration/  # the only suite that needs PostgreSQL; its own vitest config
 .claude/hooks/     # hooks: lint changed file, block schema.gql edits, verify on Stop

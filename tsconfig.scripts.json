@@ -1,0 +1,31 @@
+{
+  // The deploy scripts, compiled the way the application is.
+  //
+  // They cannot be run from source: Node executes a `.ts` file directly, decides
+  // the module system from its syntax, sees `import` and treats it as ESM — and
+  // ESM demands an extension on every relative specifier, which neither
+  // `scripts/` nor `src/` writes. So `node scripts/migrate.ts` fails to resolve
+  // its very first import. Compiling them removes the question: the migration
+  // step then runs the same CommonJS the service runs, with no loader, no extra
+  // dependency, and no devDependencies in the image that performs a deploy.
+  //
+  // A separate configuration rather than a wider `include` in
+  // `tsconfig.build.json`: that one has `rootDir: ./src`, and widening it would
+  // move the application's entry point to `dist/src/main.js` and break
+  // `start:prod` for the sake of three scripts.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist-scripts",
+    "noEmit": false,
+    // Nothing imports the output; declarations would be weight with no reader.
+    "declaration": false,
+    "tsBuildInfoFile": "./dist-scripts/tsconfig.scripts.tsbuildinfo"
+  },
+  // The three deploy steps only. `record-fixture.ts` is deliberately absent: it
+  // is written for ESM — top-level await, `import.meta`, explicit `.ts`
+  // specifiers — and it runs from source by hand, which is exactly the thing
+  // that works today.
+  "include": ["scripts/migrate.ts", "scripts/seed.ts", "scripts/partitions.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist", "dist-scripts", "test", "**/*.spec.ts"]
+}

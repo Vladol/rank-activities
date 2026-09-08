@@ -19,7 +19,15 @@ const LISBON = { latitude: 38.7167, longitude: -9.1333 };
 async function boot() {
   const moduleRef = await Test.createTestingModule({
     imports: [
-      ConfigModule.forRoot({ isGlobal: true, cache: false, validate: validateEnv }),
+      // The local `.env` is not read: this module runs on recordings, and a
+      // developer pointing their own environment at the live API must not
+      // change what this test binds (as in `weather.module.spec.ts`).
+      ConfigModule.forRoot({
+        isGlobal: true,
+        cache: false,
+        ignoreEnvFile: true,
+        validate: validateEnv,
+      }),
       ActivitiesModule,
       WeatherModule.forRoot(),
       GeoModule,

@@ -21,6 +21,103 @@ npm run clear       # kill whatever process listens on port 3000
 npm run restart     # clear, then rebuild and start in watch mode
 ```
 
+## Running in Docker
+
+The whole stack — the API and its PostgreSQL — with one command:
+
+```bash
+docker compose up -d --build
+```
+
+Then GraphiQL is at http://localhost:3000/graphql and readiness at
+http://localhost:3000/health/ready, which answers `{"status":"ready","store":"at_head"}`
+once the schema is in place.
+
+Three services come up, in this order:
+
+| Service | Image | What it is |
+|---|---|---|
+| `db` | `postgres:17-alpine` | The store, on a named volume. Everything else waits for its health check, not merely for its process |
+| `migrate` | this repository | The deploy step: `db:migrate`, then `db:seed`, then `db:partitions`. Runs to completion and stops |
+| `api` | this repository | Starts only after `migrate` exits successfully |
+
+**Migrations run on the first start, and on every start after it.** They are a
+separate container rather than the API's entrypoint, because the service
+verifies the schema and refuses to start against one it does not recognise, but
+never migrates itself ([ADR 0003](docs/adr/0003-migrations-as-a-deploy-step.md)):
+several instances starting at once then perform no schema change between them,
+and a failed migration is a failed deploy instead of a crash loop across every
+instance. All three steps are idempotent — migrations by their journal,
+publication by `(code, version)`, partitions by `ensure_audit_partition` — so a
+second `up` publishes nothing and changes nothing.
+
+The API in this stack reads its rules **from the store**
+(`ACTIVITY_CATALOGUE_SOURCE=store`), which is what the publication step exists to
+fill, and it reads the **live** Open-Meteo API by default.
+
+There is deliberately **no Redis**. The cache port has a `memory` adapter and a
+`null` one and nothing else, `REDIS_URL` is read by no code, and a service that
+nothing connects to is a service that only appears to be part of the stack. It
+arrives together with the adapter that would use it, when a second instance makes
+the arithmetic change ([stage-six.md](docs/development-flow/stage-six.md) §2.3).
+
+### Configuration
+
+Your `.env` is passed to both containers as it is, so every setting in it —
+cache lifetimes, the outbound budget, the inbound limit — applies unchanged. It
+is optional: the environment schema has a default for everything.
+
+Four values are set by `compose.yaml` itself and win over the file:
+
+| Setting | Why it is not taken from `.env` |
+|---|---|
+| `DATABASE_URL` | `localhost` inside a container means that container. It points at the `db` service; change the credentials through `POSTGRES_*` below, which the database reads from the same values |
+| `ACTIVITY_CATALOGUE_SOURCE=store` | The point of running with a database |
+| `PORT=3000` | A `PORT` in someone's `.env` would move the listener without moving the published port |
+| `NODE_ENV` | Defaults to `development`, so GraphiQL is reachable. Set `NODE_ENV=production` for a production-shaped run |
+
+Everything else is an ordinary variable, read from `.env` or from your shell:
+
+```bash
+WEATHER_PROVIDER=mock docker compose up -d   # the whole stack, no network at all
+```
+
+| Variable | Default | What it does |
+|---|---|---|
+| `WEATHER_PROVIDER` | `open-meteo` | The weather source, as everywhere else |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `postgres` / `postgres` / `rank_activities` | The database and the credentials, used by both `db` and `DATABASE_URL` |
+| `API_HOST_PORT` | `3000` | Where the API is published on the host |
+| `POSTGRES_HOST_PORT` | `5433` | Where PostgreSQL is published on the host. **Not 5432**: a developer machine very often already has one there, and the API reaches the store over the compose network regardless |
+
+### Everyday commands
+
+```bash
+docker compose logs -f api          # follow the service
+docker compose logs migrate         # what the deploy step did
+docker compose ps                   # health of each service
+
+docker compose exec db psql -U postgres -d rank_activities   # look inside
+
+docker compose up -d --build        # rebuild after a code change
+docker compose down                 # stop, keep the data
+docker compose down -v              # stop and drop the volume: the next up is a first run again
+```
+
+The API has no restart policy on purpose. The environment is validated at
+startup and a bad one exits non-zero — a fatal misconfiguration should be
+visible at once rather than hidden inside a restart loop.
+
+While the stack is up it holds host port 3000, and `npm run test:integration`
+boots the real application on that port — the suite fails with `EADDRINUSE`
+against a running stack. Stop the one container before running it, or publish
+the API somewhere else:
+
+```bash
+docker compose stop api          # the store stays up
+API_HOST_PORT=3001 docker compose up -d
+```
+
+
 ## Tests and linting
 
 ```bash
@@ -65,11 +162,22 @@ team.
 ```bash
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/rank_activities
 
+npm run build        # the three steps below run compiled output, see the note
+
 npm run db:migrate   # a deploy step. The service never migrates itself.
 npm run db:seed      # publishes the registries, the rule versions and the
                      # demonstration profiles. Idempotent; safe on every deploy.
 npm run db:partitions  # keeps a year of audit partitions provisioned ahead
 ```
+
+They run `dist-scripts/`, built by `npm run build` alongside the application,
+rather than `scripts/*.ts` directly. Node executes a `.ts` file by stripping its
+types, decides the module system from its syntax, sees `import` and treats the
+file as ESM — and ESM demands an extension on every relative specifier, which
+this codebase does not write. Run from source, the very first import fails to
+resolve. Compiling them removes the question: a deploy then applies its
+migrations with the same CommonJS the service runs, no loader and no
+devDependency involved (`tsconfig.scripts.json`).
 
 The migration provisions a year of monthly audit partitions and a default one so
 that no insert can ever fail for want of a partition. `db:partitions` keeps that

@@ -8,7 +8,8 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && npm run build:scripts",
+    "build:scripts": "tsc -p tsconfig.scripts.json",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -21,9 +22,9 @@
     "test:e2e": "vitest run --config vitest.config.e2e.mts",
     "test:contract": "vitest run --config vitest.config.contract.mts",
     "test:integration": "vitest run --config vitest.config.integration.mts",
-    "db:migrate": "node scripts/migrate.ts",
-    "db:seed": "node scripts/seed.ts",
-    "db:partitions": "node scripts/partitions.ts"
+    "db:migrate": "node dist-scripts/scripts/migrate.js",
+    "db:seed": "node dist-scripts/scripts/seed.js",
+    "db:partitions": "node dist-scripts/scripts/partitions.js"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",
