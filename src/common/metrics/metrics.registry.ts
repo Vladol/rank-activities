@@ -55,6 +55,11 @@ export const METRIC = {
   budgetRemaining: 'weather_source_budget_remaining',
   budgetShed: 'weather_source_budget_shed_total',
   outboundAttempts: 'weather_source_attempts_total',
+  /** Reads the store could not answer, served from the copy in memory instead. */
+  profileStoreDegraded: 'location_profile_store_degraded_total',
+  /** Audit records dropped: a buffer lost on restart, or a write that failed. */
+  auditRecordsLost: 'computation_audit_records_lost_total',
+  auditRecordsWritten: 'computation_audit_records_written_total',
 } as const;
 
 /** `cache operations` is one series with an outcome label, not four counters. */

@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { ResolvedDefinition } from '../../domain/activity/activity-definition';
@@ -32,6 +34,8 @@ import { SCORING_PROFILE } from '../scoring/tokens';
 import { MetricPlannerService } from '../weather/metric-planner.service';
 import type { SeriesRequest, WeatherError } from '../weather/ports/contracts';
 import { SourceRouterService } from '../weather/source-router.service';
+import { AUDIT_PORT, type AuditPort } from './audit/audit.port';
+import { recordOf } from './audit/computation-record';
 
 export interface RankingRequest {
   readonly location: LocationQuery;
@@ -68,6 +72,7 @@ export class RankingService {
     private readonly router: SourceRouterService,
     @Inject(SCORING_PROFILE) private readonly scoring: ScoringProfile,
     @Inject(RANKING_LIMITS) private readonly limits: HorizonLimits,
+    @Inject(AUDIT_PORT) private readonly audit: AuditPort,
   ) {}
 
   async rank(request: RankingRequest): Promise<Result<RankingAnswer, RankingError>> {
@@ -87,13 +92,28 @@ export class RankingService {
     }
 
     const location = located.value;
-    const plan = applicabilityPlan(
-      await this.profiles.profileFor(location),
-      this.catalogue.activities(),
-    );
-    const data = await this.gather(location, plan, days.value);
+    const profile = await this.profiles.profileFor(location);
 
-    return ok(this.assemble(location, plan, data, days.value));
+    if (!profile.ok) {
+      // The place resolved and we still cannot say what is possible there. It
+      // is refused rather than answered from nothing, and with a reason that is
+      // not `LOCATION_NOT_FOUND`: the place exists, our record of it does not
+      // (spec `data-persistence`, "A new location is refused with a reason").
+      return err(profile.error);
+    }
+
+    const plan = applicabilityPlan(profile.value, this.catalogue.activities());
+    const data = await this.gather(location, plan, days.value);
+    const answer = this.assemble(location, plan, data, days.value);
+
+    // Buffered, never awaited. The answer is already complete, and a round trip
+    // to the store here would put the database back on the path that Decision 2
+    // took it off (design.md, Decision 7).
+    this.audit.record(
+      recordOf(randomUUID(), answer, (code) => this.catalogue.find(code)?.version ?? 0),
+    );
+
+    return ok(answer);
   }
 
   /**

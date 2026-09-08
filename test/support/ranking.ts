@@ -14,6 +14,9 @@ import type { PlaceLookupPort } from '../../src/modules/weather/ports/place-look
 import type { SeriesPort } from '../../src/modules/weather/ports/series.port';
 import { SourceRouterService } from '../../src/modules/weather/source-router.service';
 import { type RecordingSeriesPort, recordingPort } from './fake-series-port';
+import { InMemoryLocationStore } from '../../src/modules/geo/adapters/in-memory-location.store';
+import { AuditBufferService } from '../../src/modules/ranking/audit/audit-buffer.service';
+import type { AuditWriter } from '../../src/modules/ranking/audit/audit-writer';
 
 const DAY_MS = 86_400_000;
 
@@ -23,6 +26,8 @@ export interface RankingHarness {
   readonly marine: SeriesPort<'marine'>;
   readonly archive: SeriesPort<'archive'>;
   readonly lookup: PlaceLookupPort;
+  /** The audit buffer the service records into; no writer stands behind it. */
+  readonly audit: AuditBufferService;
   /** Requests every recording port was given, in the order they arrived. */
   readonly requests: () => readonly { capability: Capability; metrics: readonly string[] }[];
   /** Moves the profile clock on, which is what a two-phase probe needs. */
@@ -36,6 +41,8 @@ export interface HarnessOptions {
   readonly archive?: SeriesPort<'archive'>;
   readonly lookup?: PlaceLookupPort;
   readonly now?: number;
+  /** Where the audit goes. Absent means nowhere, as in a build with no store. */
+  readonly auditWriter?: AuditWriter;
 }
 
 /**
@@ -56,11 +63,20 @@ export function rankingHarness(options: HarnessOptions = {}): RankingHarness {
 
   let clock = options.now ?? Date.now();
 
+  // With no writer behind it the records are shaped and counted and nothing is
+  // written, which is what a build with no store does; a test that cares what
+  // was written supplies one.
+  const audit = new AuditBufferService(options.auditWriter, {
+    flushIntervalMs: 0,
+    maxRecords: 1000,
+  });
+
   const profiles = new LocationProfileService(
     new InMemoryLocationProfileStore(),
     new MarineProbeService(marine),
     new SnowSeasonService(archive),
     catalogue,
+    new InMemoryLocationStore(),
     { now: () => clock },
   );
 
@@ -72,10 +88,12 @@ export function rankingHarness(options: HarnessOptions = {}): RankingHarness {
     new SourceRouterService([forecast, marine, archive]),
     readScoringProfile(),
     options.limits ?? { defaultDays: 7, maxDays: 7 },
+    audit,
   );
 
   return {
     service,
+    audit,
     forecast,
     marine,
     archive,

@@ -37,3 +37,28 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  # A separate job, because it is the only one that needs a container.
+  #
+  # It is not folded into `verify`: `npm test` and `npm run test:e2e` must pass
+  # with no database and no network, and a job that always has one running is a
+  # job that cannot notice when that stops being true
+  # (spec `data-persistence`, "The whole test suite needs no store").
+  #
+  # Testcontainers starts and stops PostgreSQL itself, so there is no `services:`
+  # block here: the suite would then pass locally against a container it started
+  # and in CI against one it did not, and only one of those is what ships.
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Integration tests (PostgreSQL via testcontainers)
+        run: npm run test:integration

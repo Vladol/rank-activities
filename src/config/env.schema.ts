@@ -110,6 +110,32 @@ export const envSchema = z.object({
   BREAKER_CONSECUTIVE_FAILURES: z.coerce.number().int().positive().default(5),
   BREAKER_HALF_OPEN_AFTER_MS: z.coerce.number().int().positive().default(30_000),
 
+  /**
+   * Where the rules are read from. `files` is the default and the source of
+   * truth (ADR 0007): the service starts, validates and ranks with no store at
+   * all. `store` reads the published versions instead, which is what a
+   * deployment chooses when it wants a newly published version picked up
+   * without a restart; it requires DATABASE_URL.
+   */
+  ACTIVITY_CATALOGUE_SOURCE: z.enum(['files', 'store']).default('files'),
+
+  /**
+   * How long the in-process copy of the rules is trusted before the store is
+   * asked whether a newer version exists. Read only when the catalogue source
+   * is `store`. Rules change about once a month, so this is a cadence rather
+   * than a consistency mechanism.
+   */
+  ACTIVITY_CATALOGUE_REFRESH_SECONDS: z.coerce.number().int().positive().default(300),
+
+  /**
+   * How long a computation record may wait in memory before a flush is
+   * attempted, and how many may wait at once. Past the count the oldest are
+   * dropped and counted: a buffer without a bound turns a store outage into an
+   * out-of-memory kill, which costs the answers the buffer exists to protect.
+   */
+  AUDIT_FLUSH_INTERVAL_SECONDS: z.coerce.number().int().positive().default(5),
+  AUDIT_BUFFER_MAX_RECORDS: z.coerce.number().int().positive().default(1000),
+
   DATABASE_URL: z.url().optional(),
   REDIS_URL: z.url().optional(),
 })
@@ -139,7 +165,14 @@ export const envSchema = z.object({
       path: ['WEATHER_ARCHIVE_CACHE_MAX_STALE_SECONDS'],
       message: 'data cannot stop being servable before it stops being fresh',
     },
-  );
+  )
+  // Reading the rules from a store that was never configured is not a
+  // degradation to recover from at runtime: it is a deploy that cannot work,
+  // and it is cheaper to say so at startup.
+  .refine((env) => env.ACTIVITY_CATALOGUE_SOURCE === 'files' || env.DATABASE_URL !== undefined, {
+    path: ['ACTIVITY_CATALOGUE_SOURCE'],
+    message: 'reading the rules from the store needs DATABASE_URL',
+  });
 
 export type Env = z.infer<typeof envSchema>;
 

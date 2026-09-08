@@ -25,7 +25,12 @@ npm run restart                  # free port 3000, rebuild, start
 npm run lint                     # oxlint
 npm test                         # unit (vitest)
 npm run test:e2e                 # e2e
+npm run test:integration         # PostgreSQL in a container; the only suite needing one
 npx tsc --noEmit                 # types
+
+npm run db:migrate               # deploy step. The service never migrates itself.
+npm run db:seed                  # publishes registries, rule versions, demo profiles
+npm run db:partitions            # keeps a year of audit partitions provisioned ahead
 ```
 
 ## Hard rules
@@ -51,6 +56,21 @@ npx tsc --noEmit                 # types
   A fixture is a recorded response, never a hand-written one: add one with
   `node scripts/record-fixture.ts <name> "<url>"`. Strategy and fixture table:
   [docs/requirements/mocking.md](docs/requirements/mocking.md).
+- **No weather series are stored.** The database holds conclusions — a
+  snow-season verdict, a coverage verdict — and never an hourly or daily series;
+  a forecast table would be a second, worse copy of Open-Meteo. The cache owns
+  the series. The whole map is
+  [docs/investigation/data-model.md](docs/investigation/data-model.md).
+- **The service verifies the schema and never migrates itself.** Migration is a
+  deploy step (`npm run db:migrate`); at startup the service checks the schema is
+  at head and exits non-zero if it is not. Reference data and rule versions
+  arrive by publication (`npm run db:seed`), never by migration.
+- **A published version of the rules is immutable.** Publication is idempotent by
+  `(code, version)`; different content under a version that already exists fails
+  the deploy, enforced by a trigger rather than by review.
+- **The service runs without a database.** Rules load from `seeds/`, so `npm test`
+  and `npm run test:e2e` need no store and no network. What an unreachable store
+  costs is a stated table, exercised in `test/integration/degradation.spec.ts`.
 - **The environment is validated at startup** (`src/config/env.schema.ts`). A new
   variable means editing the schema and `.env.example`, not reading
   `process.env.X` in place. A variable missing from `.env.example` fails a test.
@@ -94,11 +114,15 @@ The target layout is described in flow.md §4.3. What exists today:
 
 ```
 src/config/        # zod environment schema, fail-fast at startup; caching and budget settings
+src/infrastructure/db/           # schema, hand-written migrations, seed, startup guard, uuid5
 src/common/cache/  # CachePort, memory and null adapters, cache-keys.ts, codecs, single-flight
 src/common/metrics/# the counter and gauge registry; Prometheus exports it in stage 7
 src/domain/        # pure core: metrics, units, series, Result, location identity and profiles
 src/modules/       # health, weather (ports, selection, adapters), activities, geo, ranking, api
 src/modules/geo/   # location resolver, applicability profile, marine probe, snow-season evidence
+src/modules/geo/adapters/        # in-memory and PostgreSQL stores for locations and profiles
+src/modules/activities/adapters/ # the store-backed catalogue, beside the file-backed one
+src/modules/ranking/audit/       # the buffered computation audit, off the hot path
 src/modules/ranking/     # the use case: resolve -> applicability -> plan -> fetch -> score -> order
 src/modules/api/graphql/ # result models and the mapper; the only place a GraphQL decorator lives
 src/modules/weather/decorators/          # the one wrapping factory: observed, cached, resilient
@@ -107,6 +131,7 @@ src/modules/weather/adapters/mock/       # recorded sources, fixture registry, r
 src/modules/weather/adapters/open-meteo/ # zod schema and raw->domain mapper, shared with the live client
 scripts/           # record-fixture.ts: the only supported way to add a fixture
 test/setup/        # no-network.ts, loaded by both vitest configs
+test/integration/  # the only suite that needs PostgreSQL; its own vitest config
 .claude/hooks/     # hooks: lint changed file, block schema.gql edits, verify on Stop
 openspec/          # specs and change proposals
 ```

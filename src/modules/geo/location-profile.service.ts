@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 
 import type { ResolvedDefinition } from '../../domain/activity/activity-definition';
 import { APPLICABILITY_RULES_VERSION } from '../../domain/activity/applicability.registry';
@@ -11,13 +11,21 @@ import {
   recordProbe,
 } from '../../domain/location/location-profile';
 import type { ResolvedLocation } from '../../domain/location/resolved-location';
+import { type DomainError, domainError } from '../../domain/shared/domain-error';
+import type { ReasonCode } from '../../domain/shared/reason-code';
+import { type Result, err, ok } from '../../domain/shared/result';
+import { SingleFlight } from '../../common/cache/single-flight';
 import {
   ACTIVITY_CATALOGUE,
   type ActivityCataloguePort,
 } from '../activities/ports/activity-catalogue.port';
 import { LOCATION_PROFILE_STORE, type LocationProfilePort } from './ports/location-profile.port';
+import { LOCATION_STORE, type LocationStorePort } from './ports/location-store.port';
 import { MarineProbeService } from './marine-probe.service';
 import { SnowSeasonService } from './snow-season.service';
+
+/** Why a place could not be profiled. From the one registry, like every reason. */
+export type ProfileError = DomainError<ReasonCode>;
 
 export interface LocationProfileOptions {
   /** The clock the probe's day is read from. Injected so a test can move it. */
@@ -44,20 +52,62 @@ const DEFAULT_CONFIRMATIONS = 2;
  */
 @Injectable()
 export class LocationProfileService {
+  private readonly logger = new Logger(LocationProfileService.name);
+
   private readonly now: () => number;
+
+  /**
+   * One profiling at a time per location.
+   *
+   * Two requests for the same place arriving together would otherwise both find
+   * no probe recorded and both issue one, and the second would be spent on a
+   * question the first had already answered. The store's primary key keeps the
+   * second from being *recorded*; this keeps it from being *made*
+   * (spec, "The same day cannot be probed twice").
+   */
+  private readonly profiling = new SingleFlight<Result<LocationProfile, ProfileError>>();
 
   constructor(
     @Inject(LOCATION_PROFILE_STORE) private readonly store: LocationProfilePort,
     private readonly marineProbe: MarineProbeService,
     private readonly snowSeason: SnowSeasonService,
     @Inject(ACTIVITY_CATALOGUE) private readonly catalogue: ActivityCataloguePort,
+    @Inject(LOCATION_STORE) private readonly locations: LocationStorePort,
     @Optional() @Inject(LOCATION_PROFILE_OPTIONS) options: LocationProfileOptions = {},
   ) {
     this.now = options.now ?? (() => Date.now());
   }
 
-  async profileFor(location: ResolvedLocation): Promise<LocationProfile> {
-    const stored = await this.store.find(location.id);
+  profileFor(location: ResolvedLocation): Promise<Result<LocationProfile, ProfileError>> {
+    return this.profiling.run(location.id, () => this.compute(location));
+  }
+
+  private async compute(
+    location: ResolvedLocation,
+  ): Promise<Result<LocationProfile, ProfileError>> {
+    let stored: LocationProfile | undefined;
+
+    try {
+      stored = await this.store.find(location.id);
+    } catch (cause) {
+      // The adapter answers from memory through an outage and only throws when
+      // the store said something we cannot act on — a table that is not there,
+      // a column that moved. Not knowing whether we know this place is the same
+      // refusal as not being able to store it, and it must not escape as a 500.
+      return this.unprofilable(location, cause);
+    }
+
+    if (stored === undefined) {
+      // The place before the evidence about the place. Doing it here rather
+      // than beside the profile write is what keeps an outage from costing two
+      // outbound calls per request for a location we are going to refuse anyway.
+      try {
+        await this.locations.save(location);
+      } catch (cause) {
+        return this.unprofilable(location, cause);
+      }
+    }
+
     const declared = this.catalogue.activities();
     const instant = this.now();
     const today = dayOf(instant);
@@ -72,9 +122,9 @@ export class LocationProfileService {
 
     if (stored !== undefined && !isOutdated(stored) && !snow.changed && !marine.changed) {
       // `computedAt` means when the evidence was computed. Re-stamping it here
-      // would hide the age of a heuristic guess and, once the store is a
-      // database, turn every read into a write.
-      return stored;
+      // would hide the age of a heuristic guess and turn every read into a
+      // write.
+      return ok(stored);
     }
 
     // Reached either because something was gathered, or because the profile is
@@ -93,9 +143,46 @@ export class LocationProfileService {
       },
     };
 
-    await this.store.save(profile);
+    try {
+      await this.store.save(profile);
+    } catch (cause) {
+      if (stored !== undefined) {
+        // A place we already knew stays rankable. What is lost is the freshly
+        // gathered evidence, which costs one more probe tomorrow — not an
+        // answer today (spec, "A known location still ranks").
+        this.logger.warn(
+          `Could not store the profile for ${location.id}: ${describe(cause)}. ` +
+            'Answering from what was already known.',
+        );
 
-    return profile;
+        return ok(stored);
+      }
+
+      return this.unprofilable(location, cause);
+    }
+
+    return ok(profile);
+  }
+
+  /**
+   * A place that resolved and cannot be profiled.
+   *
+   * It is refused rather than answered from evidence held only in this process:
+   * the two-phase confirmation needs yesterday's probe to exist today, and a
+   * probe that lives in memory never reaches tomorrow — which is exactly the
+   * defect this change exists to repair.
+   */
+  private unprofilable(
+    location: ResolvedLocation,
+    cause: unknown,
+  ): Result<LocationProfile, ProfileError> {
+    this.logger.error(`Could not profile ${location.id}: ${describe(cause)}`);
+
+    return err(
+      domainError('PROFILE_UNAVAILABLE', 'what is known about places cannot be reached', {
+        locationId: location.id,
+      }),
+    );
   }
 
   /**
@@ -147,6 +234,10 @@ export class LocationProfileService {
 
     return { evidence: recordProbe(known, outcome, today), changed: true };
   }
+}
+
+function describe(cause: unknown): string {
+  return cause instanceof Error ? cause.message : String(cause);
 }
 
 /** Evidence, and whether reaching it cost an outbound call. */

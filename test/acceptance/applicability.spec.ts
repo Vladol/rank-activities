@@ -12,6 +12,8 @@ import { LocationProfileService } from '../../src/modules/geo/location-profile.s
 import { LocationResolverService } from '../../src/modules/geo/location-resolver.service';
 import { MarineProbeService } from '../../src/modules/geo/marine-probe.service';
 import { SnowSeasonService } from '../../src/modules/geo/snow-season.service';
+import { InMemoryLocationStore } from '../../src/modules/geo/adapters/in-memory-location.store';
+import { profiled } from '../support/profile';
 
 /**
  * The acceptance cases of docs/development-flow/stage-two.md, section 12, that
@@ -57,14 +59,15 @@ async function settled(location: ResolvedLocation, days = 2) {
     new MarineProbeService(marine),
     new SnowSeasonService(recordedSeriesSource('archive')),
     catalogue,
+    new InMemoryLocationStore(),
     { now: () => now },
   );
 
-  let profile = await service.profileFor(location);
+  let profile = await profiled(service, location);
 
   for (let day = 1; day < days; day += 1) {
     now += DAY_MS;
-    profile = await service.profileFor(location);
+    profile = await profiled(service, location);
   }
 
   const plan = applicabilityPlan(profile, catalogue.activities());
@@ -157,10 +160,10 @@ describe('stage two, section 12: the applicability cases', () => {
 
   it('sightseeing needs no evidence and is possible everywhere', async () => {
     for (const place of [PRAGUE, QUITO]) {
-      const profiled = await settled(place);
+      const anywhere = await settled(place);
 
-      expect(profiled.verdict('indoor-sightseeing')).toEqual({ kind: 'applicable' });
-      expect(profiled.verdict('outdoor-sightseeing')).toEqual({ kind: 'applicable' });
+      expect(anywhere.verdict('indoor-sightseeing')).toEqual({ kind: 'applicable' });
+      expect(anywhere.verdict('outdoor-sightseeing')).toEqual({ kind: 'applicable' });
     }
   });
 });

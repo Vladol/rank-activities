@@ -10,6 +10,7 @@ import { AppService } from './app.service';
 import { validateEnv } from './config/env.schema';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { ApiModule } from './modules/api/api.module';
+import { DatabaseModule } from './infrastructure/db/database.module';
 import { GeoModule } from './modules/geo/geo.module';
 import { HealthModule } from './modules/health/health.module';
 import { WeatherModule } from './modules/weather/weather.module';
@@ -25,6 +26,11 @@ import { WeatherModule } from './modules/weather/weather.module';
       sortSchema: true,
       graphiql: process.env.NODE_ENV !== 'production',
     }),
+    // The store, when one is configured. Global, because geo writes profiles,
+    // activities reads published versions and ranking writes audit; and
+    // optional, because none of those three stop working without it — what is
+    // lost is the degradation table of `data-persistence` and nothing else.
+    DatabaseModule,
     HealthModule,
     // The catalogue and the scoring profile, both read from disk at startup and
     // both fatal when invalid: an activity is data, and data that cannot be

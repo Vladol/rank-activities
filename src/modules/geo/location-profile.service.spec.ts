@@ -12,6 +12,8 @@ import { InMemoryLocationProfileStore } from './adapters/in-memory-profile.store
 import { LocationProfileService } from './location-profile.service';
 import { MarineProbeService } from './marine-probe.service';
 import { SnowSeasonService } from './snow-season.service';
+import { InMemoryLocationStore } from './adapters/in-memory-location.store';
+import { profiled } from '../../../test/support/profile';
 
 const catalogue = SeedActivityCatalogue.load();
 
@@ -43,6 +45,7 @@ function harness(options: { readonly marine?: ReturnType<typeof recordingMarineP
     new MarineProbeService(marine),
     new SnowSeasonService(archive),
     catalogue,
+    new InMemoryLocationStore(),
     { now: () => now },
   );
 
@@ -66,7 +69,7 @@ function verdictFor(profile: Parameters<typeof activityApplicability>[0], code: 
 describe('profiling a location', () => {
   it('records the evidence, its basis and the rules version that read it', async () => {
     const { service } = harness();
-    const profile = await service.profileFor(LISBON);
+    const profile = await profiled(service, LISBON);
 
     expect(profile.rulesVersion).toBe(APPLICABILITY_RULES_VERSION);
     expect(profile.computedAt).toBe(new Date(FIRST_DAY).toISOString());
@@ -77,9 +80,9 @@ describe('profiling a location', () => {
   it('gathers evidence once and reuses it on the next request', async () => {
     const { service, marine, archive } = harness();
 
-    await service.profileFor(LISBON);
+    await profiled(service, LISBON);
     const after = { marine: marine.requests.length, archive: archive.requests.length };
-    await service.profileFor(LISBON);
+    await profiled(service, LISBON);
 
     expect(marine.requests).toHaveLength(after.marine);
     expect(archive.requests).toHaveLength(after.archive);
@@ -91,11 +94,11 @@ describe('profiling a location', () => {
     // bump re-read two archive months per location and reset every marine
     // candidacy, which is exactly what storing the evidence was for.
     const { service, store, archive, marine } = harness();
-    const stale = await service.profileFor(LISBON);
+    const stale = await profiled(service, LISBON);
     await store.save({ ...stale, rulesVersion: APPLICABILITY_RULES_VERSION - 1 });
 
     const before = { archive: archive.requests.length, marine: marine.requests.length };
-    const fresh = await service.profileFor(LISBON);
+    const fresh = await profiled(service, LISBON);
 
     expect(fresh.rulesVersion).toBe(APPLICABILITY_RULES_VERSION);
     expect(fresh.evidence).toEqual(stale.evidence);
@@ -108,8 +111,8 @@ describe('profiling a location', () => {
     // read. Refreshing it per request hides how old a heuristic guess is, and
     // becomes a write per request once the store is a database.
     const { service } = harness();
-    const first = await service.profileFor(LISBON);
-    const second = await service.profileFor(LISBON);
+    const first = await profiled(service, LISBON);
+    const second = await profiled(service, LISBON);
 
     expect(second).toEqual(first);
     expect(second.computedAt).toBe(first.computedAt);
@@ -117,7 +120,7 @@ describe('profiling a location', () => {
 
   it('gathers no evidence for activities that declare no rule', async () => {
     const { service } = harness();
-    const profile = await service.profileFor(LISBON);
+    const profile = await profiled(service, LISBON);
 
     expect(verdictFor(profile, 'outdoor-sightseeing')).toEqual({ kind: 'applicable' });
     expect(verdictFor(profile, 'indoor-sightseeing')).toEqual({ kind: 'applicable' });
@@ -127,7 +130,7 @@ describe('profiling a location', () => {
 describe('an inland location, probed twice', () => {
   it('is a candidate after one probe, and surfing is missing data rather than impossible', async () => {
     const { service, marine } = harness();
-    const profile = await service.profileFor(PRAGUE);
+    const profile = await profiled(service, PRAGUE);
 
     expect(marine.requests).toHaveLength(1);
     expect(profile.evidence.marineCoverage?.allNullProbeDates).toEqual(['2026-09-08']);
@@ -140,17 +143,17 @@ describe('an inland location, probed twice', () => {
   it('is not probed a second time on the same day', async () => {
     const { service, marine } = harness();
 
-    await service.profileFor(PRAGUE);
-    await service.profileFor(PRAGUE);
+    await profiled(service, PRAGUE);
+    await profiled(service, PRAGUE);
 
     expect(marine.requests).toHaveLength(1);
   });
 
   it('has no coastline once a probe on a later day agrees', async () => {
     const { service, marine, advance } = harness();
-    await service.profileFor(PRAGUE);
+    await profiled(service, PRAGUE);
     advance(1);
-    const profile = await service.profileFor(PRAGUE);
+    const profile = await profiled(service, PRAGUE);
 
     expect(marine.requests).toHaveLength(2);
     expect(verdictFor(profile, 'surfing')).toEqual({
@@ -161,11 +164,11 @@ describe('an inland location, probed twice', () => {
 
   it('stops probing once the missing coastline is confirmed', async () => {
     const { service, marine, advance } = harness();
-    await service.profileFor(PRAGUE);
+    await profiled(service, PRAGUE);
     advance(1);
-    await service.profileFor(PRAGUE);
+    await profiled(service, PRAGUE);
     advance(1);
-    await service.profileFor(PRAGUE);
+    await profiled(service, PRAGUE);
 
     expect(marine.requests).toHaveLength(2);
   });
@@ -174,7 +177,7 @@ describe('an inland location, probed twice', () => {
 describe('a lake the wave model does not cover', () => {
   it('follows the same path and ends inapplicable once confirmed', async () => {
     const { service, advance } = harness();
-    const first = await service.profileFor(GENEVA);
+    const first = await profiled(service, GENEVA);
 
     expect(verdictFor(first, 'surfing')).toEqual({
       kind: 'undecided',
@@ -182,7 +185,7 @@ describe('a lake the wave model does not cover', () => {
     });
 
     advance(1);
-    const confirmed = await service.profileFor(GENEVA);
+    const confirmed = await profiled(service, GENEVA);
 
     expect(verdictFor(confirmed, 'surfing')).toEqual({
       kind: 'not_applicable',
@@ -207,15 +210,16 @@ describe('a heuristic profile', () => {
             : Promise.resolve(err(domainError('TIMEOUT', 'no answer'))),
       }),
       catalogue,
+      new InMemoryLocationStore(),
       { now: () => now },
     );
 
-    expect((await service.profileFor(LISBON)).evidence.snowSeason?.basis).toBe('elevation');
+    expect((await profiled(service, LISBON)).evidence.snowSeason?.basis).toBe('elevation');
 
     reachable = true;
     now += DAY_MS;
 
-    expect((await service.profileFor(LISBON)).evidence.snowSeason?.basis).toBe('archive');
+    expect((await profiled(service, LISBON)).evidence.snowSeason?.basis).toBe('archive');
   });
 
   it('is not retried more than once a day', async () => {
@@ -228,12 +232,13 @@ describe('a heuristic profile', () => {
         fetch: () => Promise.resolve(err(domainError('TIMEOUT', 'no answer'))),
       }),
       catalogue,
+      new InMemoryLocationStore(),
       { now: () => FIRST_DAY },
     );
 
-    await service.profileFor(LISBON);
-    await service.profileFor(LISBON);
-    await service.profileFor(LISBON);
+    await profiled(service, LISBON);
+    await profiled(service, LISBON);
+    await profiled(service, LISBON);
 
     expect(archive.requests).toHaveLength(0);
   });
@@ -249,12 +254,13 @@ describe('a marine source that is down', () => {
       new MarineProbeService(marine),
       new SnowSeasonService(recordingArchivePort()),
       catalogue,
+      new InMemoryLocationStore(),
       { now: () => now },
     );
 
-    await service.profileFor(PRAGUE);
+    await profiled(service, PRAGUE);
     now += DAY_MS;
-    const profile = await service.profileFor(PRAGUE);
+    const profile = await profiled(service, PRAGUE);
 
     expect(profile.evidence.marineCoverage?.allNullProbeDates).toEqual([]);
     expect(verdictFor(profile, 'surfing')).toEqual({
@@ -270,12 +276,13 @@ describe('a marine source that is down', () => {
       new MarineProbeService(marine),
       new SnowSeasonService(recordingArchivePort()),
       catalogue,
+      new InMemoryLocationStore(),
       { now: () => FIRST_DAY },
     );
 
-    await service.profileFor(PRAGUE);
-    await service.profileFor(PRAGUE);
-    await service.profileFor(PRAGUE);
+    await profiled(service, PRAGUE);
+    await profiled(service, PRAGUE);
+    await profiled(service, PRAGUE);
 
     expect(marine.requests).toHaveLength(1);
   });
@@ -284,9 +291,9 @@ describe('a marine source that is down', () => {
 describe('a coastal location', () => {
   it('is settled by the first probe that returns waves, and never probed again', async () => {
     const { service, marine, advance } = harness();
-    await service.profileFor(LISBON);
+    await profiled(service, LISBON);
     advance(2);
-    const profile = await service.profileFor(LISBON);
+    const profile = await profiled(service, LISBON);
 
     expect(marine.requests).toHaveLength(1);
     expect(verdictFor(profile, 'surfing')).toEqual({ kind: 'applicable' });

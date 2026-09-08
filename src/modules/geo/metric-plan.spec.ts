@@ -12,6 +12,8 @@ import { InMemoryLocationProfileStore } from './adapters/in-memory-profile.store
 import { LocationProfileService } from './location-profile.service';
 import { MarineProbeService } from './marine-probe.service';
 import { SnowSeasonService } from './snow-season.service';
+import { InMemoryLocationStore } from './adapters/in-memory-location.store';
+import { profiled } from '../../../test/support/profile';
 
 const catalogue = SeedActivityCatalogue.load();
 const planner = new MetricPlannerService();
@@ -38,14 +40,15 @@ async function profileAndPlan(location: ResolvedLocation, days = 1) {
     new MarineProbeService(marine),
     new SnowSeasonService(archive),
     catalogue,
+    new InMemoryLocationStore(),
     { now: () => now },
   );
 
-  let profile: LocationProfile = await service.profileFor(location);
+  let profile: LocationProfile = await profiled(service, location);
 
   for (let day = 1; day < days; day += 1) {
     now += 86_400_000;
-    profile = await service.profileFor(location);
+    profile = await profiled(service, location);
   }
 
   const plan = applicabilityPlan(profile, catalogue.activities());

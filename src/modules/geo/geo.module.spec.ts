@@ -11,6 +11,7 @@ import { GeoModule } from './geo.module';
 import { LocationProfileService } from './location-profile.service';
 import { LocationResolverService } from './location-resolver.service';
 import { LOCATION_PROFILE_STORE } from './ports/location-profile.port';
+import { profiled } from '../../../test/support/profile';
 
 /** The coordinates the series recordings were made at, not the geocoded ones. */
 const LISBON = { latitude: 38.7167, longitude: -9.1333 };
@@ -49,7 +50,7 @@ describe('the geo module', () => {
 
   it('profiles a location end to end, on recorded data', async () => {
     const moduleRef = await boot();
-    const profile = await moduleRef.get(LocationProfileService).profileFor({
+    const profile = await profiled(moduleRef.get(LocationProfileService), {
       id: locationId(LISBON),
       coordinates: LISBON,
       timezone: 'Europe/Lisbon',

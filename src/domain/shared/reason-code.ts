@@ -27,6 +27,14 @@ export const REASON = {
    */
   PROVIDER_BUSY: { kind: 'no_data', i18n: 'reason.provider_busy', retryable: true },
   MARINE_UNAVAILABLE: { kind: 'no_data', i18n: 'reason.marine_unavailable', retryable: true },
+  /**
+   * The store that keeps what is known about places could not be reached, and
+   * this place is not one we already knew. It is deliberately distinct from
+   * `LOCATION_NOT_FOUND`: the place exists and was resolved, and what is missing
+   * is our own record of it (`data-persistence`, "A new location is refused with
+   * a reason").
+   */
+  PROFILE_UNAVAILABLE: { kind: 'no_data', i18n: 'reason.profile_unavailable', retryable: true },
   TOO_MANY_GAPS: { kind: 'no_data', i18n: 'reason.too_many_gaps', retryable: false },
   MISSING_REQUIRED_METRIC: {
     kind: 'no_data',

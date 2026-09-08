@@ -1,0 +1,12 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    { "idx": 0, "version": "7", "when": 1757260800000, "tag": "0001_reference", "breakpoints": true },
+    { "idx": 1, "version": "7", "when": 1757260800001, "tag": "0002_rules", "breakpoints": true },
+    { "idx": 2, "version": "7", "when": 1757260800002, "tag": "0003_locations", "breakpoints": true },
+    { "idx": 3, "version": "7", "when": 1757260800003, "tag": "0004_applicability", "breakpoints": true },
+    { "idx": 4, "version": "7", "when": 1757260800004, "tag": "0005_place_lookup", "breakpoints": true },
+    { "idx": 5, "version": "7", "when": 1757260800005, "tag": "0006_audit", "breakpoints": true }
+  ]
+}
