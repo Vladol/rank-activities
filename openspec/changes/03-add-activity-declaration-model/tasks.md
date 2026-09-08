@@ -1,29 +1,29 @@
 ## 1. Registries the declaration refers to
 
-- [ ] 1.1 Write failing tests for `linear`, `inverse`, `trapezoid`, `gaussian`,
+- [x] 1.1 Write failing tests for `linear`, `inverse`, `trapezoid`, `gaussian`,
       `inverseGaussian` and `step` as pure functions returning 0…1, then add them under
       `src/domain/scoring/normalizers/`. Clamping is unconditional — there is no `clamp`
       parameter.
-- [ ] 1.2 Add `normalizer.registry.ts` where each entry carries a parameter schema and its
+- [x] 1.2 Add `normalizer.registry.ts` where each entry carries a parameter schema and its
       declared monotonicity; test that registering a duplicate code fails, that parameters
       are validated by the entry's own schema, and that the six invariants of stage 5 §2
       hold under property-based tests.
-- [ ] 1.3 Write failing tests, then add the aggregation registry with `mean`, `max`, `min`,
+- [x] 1.3 Write failing tests, then add the aggregation registry with `mean`, `max`, `min`,
       `sum`, `identity`, `shareOfHours`, `countIf` and `daylightWindow`; test that each
       reports how many slots contributed and how many were missing, and that an entry
       declares which granularity it reads from.
-- [ ] 1.4 Test `daylightWindow` against a day with zero daylight hours: it returns no
+- [x] 1.4 Test `daylightWindow` against a day with zero daylight hours: it returns no
       value, never a non-numeric one.
-- [ ] 1.5 Test `shareOfHours` against a day whose series holds 23 hours: the denominator is
+- [x] 1.5 Test `shareOfHours` against a day whose series holds 23 hours: the denominator is
       23, not 24.
-- [ ] 1.6 Add the shared predicate tree (`lt`/`lte`/`gt`/`gte`/`eq`/`ne`/`in`/`notIn` with
+- [x] 1.6 Add the shared predicate tree (`lt`/`lte`/`gt`/`gte`/`eq`/`ne`/`in`/`notIn` with
       `anyOf`/`allOf`/`not`) used by both `shareOfHours` and hard constraints; test that
       `in` over WMO codes never compares codes by magnitude.
-- [ ] 1.7 Add the derived-metric registry with the three entries of stage 5 §4: the angle
+- [x] 1.7 Add the derived-metric registry with the three entries of stage 5 §4: the angle
       between wind and wave direction, cold fresh snowfall, and the freezing-level margin
       against the series elevation. Test that each declares its base metrics, is not named
       after an activity, and reads no location record.
-- [ ] 1.8 Pin the direction convention with an acceptance test on a west-coast fixture: an
+- [x] 1.8 Pin the direction convention with an acceptance test on a west-coast fixture: an
       easterly wind must yield a high wind–wave angle. Inverting the convention must fail
       the test (stage 5 §16.1).
 
