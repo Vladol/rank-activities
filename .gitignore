@@ -1,8 +1,11 @@
 # compiled output
 /dist
 /node_modules
-/docs
 *.tsbuildinfo
+
+# docs/ is version-controlled: CLAUDE.md and flow.md link into it, and a clone
+# without it cannot follow them. The task brief is the one thing kept out.
+/docs
 
 # generated GraphQL SDL (code-first)
 /src/schema.gql

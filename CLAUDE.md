@@ -45,6 +45,12 @@ npx tsc --noEmit                 # types
   `NotApplicable` with reason `NO_COASTLINE_NEARBY`, not "poor waves".
 - **External responses are validated with zod at the adapter boundary.** Past that
   point only domain types in canonical units travel through the code.
+- **Tests and `start:dev` never touch the network.** The development default is the
+  recorded sources over the fixtures in `src/modules/weather/adapters/mock/fixtures/`,
+  and `test/setup/no-network.ts` fails any test that opens a non-loopback connection.
+  A fixture is a recorded response, never a hand-written one: add one with
+  `node scripts/record-fixture.ts <name> "<url>"`. Strategy and fixture table:
+  [docs/requirements/mocking.md](docs/requirements/mocking.md).
 - **The environment is validated at startup** (`src/config/env.schema.ts`). A new
   variable means editing the schema and `.env.example`, not reading
   `process.env.X` in place.
@@ -81,8 +87,12 @@ The target layout is described in flow.md §4.3. What exists today:
 
 ```
 src/config/        # zod environment schema, fail-fast at startup
-src/domain/        # pure core (empty for now, filled from stage 4)
-src/modules/       # health; then weather, geo, activities, ranking, api
+src/domain/        # pure core: metrics, units, series, Result
+src/modules/       # health, weather (ports, selection, adapters); then geo, activities, ranking, api
+src/modules/weather/adapters/mock/       # recorded sources, fixture registry, rebaser, fixtures
+src/modules/weather/adapters/open-meteo/ # zod schema and raw->domain mapper, shared with the live client
+scripts/           # record-fixture.ts: the only supported way to add a fixture
+test/setup/        # no-network.ts, loaded by both vitest configs
 .claude/hooks/     # hooks: lint changed file, block schema.gql edits, verify on Stop
 openspec/          # specs and change proposals
 ```

@@ -1,0 +1,422 @@
+{
+  "recordedWith": "scripts/record-fixture.ts",
+  "fixtures": [
+    {
+      "name": "chamonix-summer",
+      "file": "chamonix-summer.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=45.9237&longitude=6.8694&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&start_date=2025-07-08&end_date=2025-07-14&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 18145,
+      "sha256": "a71d3a4961457aa598fc57c9ee3b5544f718f47fa2eec3c8432888eba9d0f7ef",
+      "location": {
+        "latitude": 45.9237,
+        "longitude": 6.8694
+      },
+      "window": {
+        "startDate": "2025-07-08",
+        "endDate": "2025-07-14"
+      },
+      "note": "Season is not applicability: ski is Ranked(0, NO_SNOW_COVER), not NotApplicable"
+    },
+    {
+      "name": "chamonix-winter-ski",
+      "file": "chamonix-winter-ski.json",
+      "endpoint": "archive",
+      "serves": [
+        "forecast",
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=45.9237&longitude=6.8694&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&start_date=2025-01-08&end_date=2025-01-14&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 18066,
+      "sha256": "871a5e835e72b47e81732b5b6be0ba18e66b849c15719be7de444726278ed1ff",
+      "location": {
+        "latitude": 45.9237,
+        "longitude": 6.8694
+      },
+      "window": {
+        "startDate": "2025-01-08",
+        "endDate": "2025-01-14"
+      },
+      "note": "Deep winter; also the null-policy fixture (ERA5 has no visibility or freezing_level_height)"
+    },
+    {
+      "name": "dubai-heat",
+      "file": "dubai-heat.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=25.2048&longitude=55.2708&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&start_date=2025-07-29&end_date=2025-08-04&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 18273,
+      "sha256": "1c5bf3b19f6bb25a8ba74e0effe2e7e46f04344366d73a61dc12c7e3e25f8879",
+      "location": {
+        "latitude": 25.2048,
+        "longitude": 55.2708
+      },
+      "window": {
+        "startDate": "2025-07-29",
+        "endDate": "2025-08-04"
+      },
+      "note": "July heat above 45 C with no precipitation: indoor above outdoor at zero rain"
+    },
+    {
+      "name": "error-bad-latitude",
+      "file": "error-bad-latitude.json",
+      "endpoint": "forecast",
+      "serves": [
+        "forecast"
+      ],
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=999&longitude=-9.1333&hourly=temperature_2m",
+      "capturedAt": "2026-09-08",
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 81,
+      "sha256": "b47a3e9a8edc2b384c405f89bcce06037318a9d270a85a8749295b0393c07387",
+      "location": {
+        "latitude": 999,
+        "longitude": -9.1333
+      },
+      "note": "HTTP 400 with a JSON error envelope; the reason is logged, never returned"
+    },
+    {
+      "name": "error-empty-body",
+      "file": "error-empty-body.json",
+      "endpoint": "forecast",
+      "serves": [
+        "forecast"
+      ],
+      "url": "https://api.open-meteo.com/v1/forecast?hourly=temperature_2m",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "location": {
+        "latitude": 0,
+        "longitude": 0
+      },
+      "note": "HTTP 200 with zero bytes. The request carries no coordinates, so the fixture is addressed at 0,0; the body itself is verbatim"
+    },
+    {
+      "name": "error-html-403",
+      "file": "error-html-403.html",
+      "endpoint": "lookup",
+      "serves": [
+        "lookup"
+      ],
+      "url": "https://geocoding-api.open-meteo.com/v1/search?name=München&count=3&format=json",
+      "capturedAt": "2026-09-08",
+      "status": 403,
+      "contentType": "text/html",
+      "bytes": 146,
+      "sha256": "32f2fa940d4b4fe19aca1e53a24e5aac29c57b7c5ee78588325b87f1b649c864",
+      "query": "munchen",
+      "note": "HTTP 403 and an nginx HTML page: unencoded UTF-8 in the query, recorded with --raw because fetch would encode it away"
+    },
+    {
+      "name": "geocoding-lisbon",
+      "file": "geocoding-lisbon.json",
+      "endpoint": "lookup",
+      "serves": [
+        "lookup"
+      ],
+      "url": "https://geocoding-api.open-meteo.com/v1/search?name=Lisbon&count=5&language=en&format=json",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 1859,
+      "sha256": "b37f8fc278bf96b2c502a8a3c0d5a36dfcb497f31fc5431e5d14136d079e64e8",
+      "query": "lisbon",
+      "note": "Place lookup, single obvious match"
+    },
+    {
+      "name": "geocoding-moscow-ambiguous",
+      "file": "geocoding-moscow-ambiguous.json",
+      "endpoint": "lookup",
+      "serves": [
+        "lookup"
+      ],
+      "url": "https://geocoding-api.open-meteo.com/v1/search?name=Moscow&count=10&language=en&format=json",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 3568,
+      "sha256": "ee7d34aa1590586c8d8205609d77cffc3aa4ad65b82ffffd7e48fa3a2ffec245",
+      "query": "moscow",
+      "note": "Ambiguous name: many candidates, largest wins downstream"
+    },
+    {
+      "name": "geocoding-not-found",
+      "file": "geocoding-not-found.json",
+      "endpoint": "lookup",
+      "serves": [
+        "lookup"
+      ],
+      "url": "https://geocoding-api.open-meteo.com/v1/search?name=Zzzqqxwv&count=5&language=en&format=json",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 31,
+      "sha256": "5449714138b221aadc52fbb9a83cc05598f59fc9b57843c783f5b2f45e52a082",
+      "query": "zzzqqxwv",
+      "note": "No match: the results key is absent altogether, not an empty array"
+    },
+    {
+      "name": "lisbon-surf",
+      "file": "lisbon-surf.json",
+      "endpoint": "forecast",
+      "serves": [
+        "forecast"
+      ],
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=38.7167&longitude=-9.1333&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&current=temperature_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,wind_speed_10m,wind_gusts_10m,wind_direction_10m&timezone=auto&forecast_days=7",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 23520,
+      "sha256": "a3e6938b5f9a0a56c64de159f96488d4c08f13aeee878b9d18fe6cdf5739d91c",
+      "location": {
+        "latitude": 38.7167,
+        "longitude": -9.1333
+      },
+      "note": "Main surf case: stage-two.md 12, Lisbon"
+    },
+    {
+      "name": "london-rainy",
+      "file": "london-rainy.json",
+      "endpoint": "forecast",
+      "serves": [
+        "forecast"
+      ],
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=51.5085&longitude=-0.1257&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&timezone=auto&forecast_days=7",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 22810,
+      "sha256": "aa40088ae85a9feacdfff31617dea7f477817ccb651af0511310593013f6f0a6",
+      "location": {
+        "latitude": 51.5085,
+        "longitude": -0.1257
+      },
+      "note": "Indoor inversion: rain every day"
+    },
+    {
+      "name": "marine-geneva-lake",
+      "file": "marine-geneva-lake.json",
+      "endpoint": "marine",
+      "serves": [
+        "marine"
+      ],
+      "url": "https://marine-api.open-meteo.com/v1/marine?latitude=46.2044&longitude=6.1432&hourly=wave_height&timezone=auto&forecast_days=3",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 2003,
+      "sha256": "c63d64c845c0272237bd6432e328b80018d4a11c76db315e9755f07956f398e3",
+      "location": {
+        "latitude": 46.2044,
+        "longitude": 6.1432
+      },
+      "note": "A lake is not a sea: the wave model does not cover the point"
+    },
+    {
+      "name": "marine-lisbon",
+      "file": "marine-lisbon.json",
+      "endpoint": "marine",
+      "serves": [
+        "marine"
+      ],
+      "url": "https://marine-api.open-meteo.com/v1/marine?latitude=38.7167&longitude=-9.1333&hourly=wave_height,wave_direction,wave_period,wind_wave_height,wind_wave_period,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature&daily=wave_height_max,wave_direction_dominant,wave_period_max,swell_wave_height_max&timezone=auto&forecast_days=7",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 11531,
+      "sha256": "130f4099eb5d086a3e3047d070ae5e98750e2aec35446c8a1fe7f2ad659188d6",
+      "location": {
+        "latitude": 38.7167,
+        "longitude": -9.1333
+      },
+      "note": "Waves where there is a sea"
+    },
+    {
+      "name": "marine-odessa-flat",
+      "file": "marine-odessa-flat.json",
+      "endpoint": "marine",
+      "serves": [
+        "marine"
+      ],
+      "url": "https://marine-api.open-meteo.com/v1/marine?latitude=46.4825&longitude=30.7233&hourly=wave_height,wave_direction,wave_period,wind_wave_height,wind_wave_period,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature&daily=wave_height_max,wave_direction_dominant,wave_period_max,swell_wave_height_max&start_date=2025-07-08&end_date=2025-07-14&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 11495,
+      "sha256": "2d93bf61a3885f850975d069bb0b5ba67a8b2e46a333b17c0e1100d1383d4328",
+      "location": {
+        "latitude": 46.4825,
+        "longitude": 30.7233
+      },
+      "window": {
+        "startDate": "2025-07-08",
+        "endDate": "2025-07-14"
+      },
+      "note": "A flat sea is not an absent sea: wave_height 0.04-0.54 m, every slot present"
+    },
+    {
+      "name": "marine-prague-inland",
+      "file": "marine-prague-inland.json",
+      "endpoint": "marine",
+      "serves": [
+        "marine"
+      ],
+      "url": "https://marine-api.open-meteo.com/v1/marine?latitude=50.0875&longitude=14.4213&hourly=wave_height&timezone=auto&forecast_days=3",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 2003,
+      "sha256": "c90362522678bb06f9819b5fe71654d4c9ab11293c703e9c1cdfb439efc4e06a",
+      "location": {
+        "latitude": 50.0875,
+        "longitude": 14.4213
+      },
+      "note": "Marine over land: HTTP 200 and every slot null (stage-three.md 5.1)"
+    },
+    {
+      "name": "prague-inland",
+      "file": "prague-inland.json",
+      "endpoint": "forecast",
+      "serves": [
+        "forecast"
+      ],
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=50.0875&longitude=14.4213&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&timezone=auto&forecast_days=7",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 22738,
+      "sha256": "50faf1ed0fc3b6554979e2565f13e53c70670040ab77d502ede655e57084b43e",
+      "location": {
+        "latitude": 50.0875,
+        "longitude": 14.4213
+      },
+      "note": "Continental: surfing must be NotApplicable, not zero"
+    },
+    {
+      "name": "queenstown-nz-ski",
+      "file": "queenstown-nz-ski.json",
+      "endpoint": "forecast",
+      "serves": [
+        "forecast"
+      ],
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=-45.0312&longitude=168.6626&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&timezone=auto&forecast_days=7",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 22548,
+      "sha256": "0078d39f26db3b1c514bfda8b819d8c37a06fc17ac0bc210e57f0aa79f6b751b",
+      "location": {
+        "latitude": -45.0312,
+        "longitude": 168.6626
+      },
+      "note": "The only ski fixture a forecast endpoint really produced"
+    },
+    {
+      "name": "quito-highland",
+      "file": "quito-highland.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-0.1807&longitude=-78.4678&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&start_date=2025-07-08&end_date=2025-07-14&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 18052,
+      "sha256": "5ada156169aed0375b1d66ccb8b199a5fb9180a67f0e35ee70077b6bdadfd377",
+      "location": {
+        "latitude": -0.1807,
+        "longitude": -78.4678
+      },
+      "window": {
+        "startDate": "2025-07-08",
+        "endDate": "2025-07-14"
+      },
+      "note": "2850 m without a snow season"
+    },
+    {
+      "name": "storm-gusts",
+      "file": "storm-gusts.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=53.3258&longitude=-9.8994&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&start_date=2025-01-21&end_date=2025-01-27&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 18045,
+      "sha256": "400c348fc2886f3b925a500ba725ae5511ccbf71cad9cd1f3c18bdf9f1ac70bb",
+      "location": {
+        "latitude": 53.3258,
+        "longitude": -9.8994
+      },
+      "window": {
+        "startDate": "2025-01-21",
+        "endDate": "2025-01-27"
+      },
+      "note": "Storm Eowyn, 24 January 2025: the cross-cutting severe-weather constraint"
+    },
+    {
+      "name": "tromso-arctic",
+      "file": "tromso-arctic.json",
+      "endpoint": "forecast",
+      "serves": [
+        "forecast"
+      ],
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=69.6489&longitude=18.9551&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&timezone=auto&forecast_days=7",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 22217,
+      "sha256": "49c158bdcaf5e0e3e91673ff1be2954442325fcc996d77291a9b5270fd0ab67a",
+      "location": {
+        "latitude": 69.6489,
+        "longitude": 18.9551
+      },
+      "note": "High latitude, live forecast"
+    },
+    {
+      "name": "tromso-polar-night",
+      "file": "tromso-polar-night.json",
+      "endpoint": "archive",
+      "serves": [
+        "archive"
+      ],
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=69.6489&longitude=18.9551&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,sunshine_duration,freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&start_date=2024-12-15&end_date=2024-12-21&timezone=auto",
+      "capturedAt": "2026-09-08",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "bytes": 18450,
+      "sha256": "24f67c4b48d874261f439542eb535f556c3004f829b6b646c97a9a89b93c35c2",
+      "location": {
+        "latitude": 69.6489,
+        "longitude": 18.9551
+      },
+      "window": {
+        "startDate": "2024-12-15",
+        "endDate": "2024-12-21"
+      },
+      "note": "Polar night: zero daylight, indoor must not be zeroed"
+    }
+  ],
+  "gaps": []
+}

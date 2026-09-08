@@ -81,6 +81,13 @@ buys a short reprieve at the cost of a rewrite.
 covered by a test asserting the rebase is a pure day-shift: same length, same values,
 same nulls, same time-of-day, dates shifted by a constant.
 
+**Amended during implementation: only a rolling horizon is rebased.** "On every read"
+was too broad. A request that names `start_date` and `end_date` is asking about those
+dates, and relabelling a July recording as today would answer a different question than
+the one asked — it would also make the archive seam unusable, since every window request
+would come back on the same axis. A `forecast` horizon is rebased onto today; a `window`
+horizon is served on the dates that were recorded.
+
 ## Decision 3: Fixtures are resolved by coordinates rounded to two decimals
 
 **Decision.** The lookup key is `lat.toFixed(2):lon.toFixed(2)` — the same rounding the
@@ -96,6 +103,19 @@ keeps `SeriesRequest` identical for both.
 answer. It would also mean a test for Prague silently scored against Lisbon's data. An
 explicit miss is worth more than a convenient wrong answer — the same principle as
 `NotApplicable` over `score: 0`.
+
+**Amended during implementation: the requested window disambiguates.** Coordinates alone
+turned out not to address a fixture uniquely, because the fixture set this change ships
+deliberately holds two recordings of one place: Chamonix in January and Chamonix in July
+are the whole of the "season is not applicability" case, and both sit at `45.92:6.87`.
+Coordinates still name the place; where more than one recording of that place exists, the
+`start_date`/`end_date` of the request selects among them, and a request whose window no
+recording covers is a miss naming the windows that were recorded. A rolling forecast
+horizon prefers a recording made against the live forecast, and falls back to an archive
+recording only when there is exactly one — two of them is an ambiguity, and answering it
+with whichever sorted first would answer a January question with July data, so it is a
+miss that names both. Nothing about the miss behaviour changes: there is still no
+nearest-neighbour and no nearest-window match.
 
 ## Decision 4: Two ski fixtures, from two different endpoints
 
@@ -144,6 +164,12 @@ not deliberate, it should be removed, and this decision can then be revisited.
 duplication, and the evidence and the fixture can never drift apart. Rejected on the
 ignore rule alone — the fixtures would not survive a clone — and on layering:
 `docs/` holds evidence for humans, `src/` holds inputs for the program.
+
+**Resolution of the blocker.** The `/docs` entry was not deliberate: it also hid
+`flow.md`, the stage documents and all seven ADRs, which `CLAUDE.md` links to. It was
+narrowed to `/docs/**/*.docx`, so everything under `docs/` is now version-controlled
+except the task brief. The decision itself stands unchanged — the second reason,
+layering, does not depend on the ignore rule, and fixtures stay under `src/`.
 
 ## Architecture
 

@@ -6,6 +6,8 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     root: './',
+    // No test may reach the network: the suite runs on recorded fixtures.
+    setupFiles: ['./test/setup/no-network.ts'],
     include: ['src/**/*.spec.ts'],
   },
   // SWC keeps `emitDecoratorMetadata` working, which Nest's DI relies on.

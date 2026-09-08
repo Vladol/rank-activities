@@ -3,16 +3,24 @@ import { ConfigService } from '@nestjs/config';
 
 import type { Env } from '../../config/env.schema';
 import { CAPABILITIES, type Capability } from '../../domain/weather/metric';
+import {
+  RECORDED_SOURCE_PREFIX,
+  recordedFixtureCount,
+} from './adapters/mock/recorded-sources';
 import { guardLimits } from './ports/limits';
+import type { PlaceLookupPort } from './ports/place-lookup.port';
 import type { SeriesPort } from './ports/series.port';
-import { CAPABILITY_PORT_TOKENS } from './ports/tokens';
+import { CAPABILITY_PORT_TOKENS, PLACE_LOOKUP_PORT } from './ports/tokens';
 import { MetricPlannerService } from './metric-planner.service';
 import { SourceRouterService } from './source-router.service';
 import {
   type BoundSources,
+  IMPLEMENTED_PLACE_LOOKUPS,
   IMPLEMENTED_SOURCES,
+  type PlaceLookupRegistry,
   type SourceRegistry,
   bindCapabilitySources,
+  bindPlaceLookup,
   selectSourceNames,
 } from './source-selection';
 
@@ -27,7 +35,10 @@ const BOUND_SOURCES = Symbol('BoundSources');
  */
 @Module({})
 export class WeatherModule {
-  static forRoot(registry: SourceRegistry = IMPLEMENTED_SOURCES): DynamicModule {
+  static forRoot(
+    registry: SourceRegistry = IMPLEMENTED_SOURCES,
+    lookups: PlaceLookupRegistry = IMPLEMENTED_PLACE_LOOKUPS,
+  ): DynamicModule {
     const bound: Provider = {
       provide: BOUND_SOURCES,
       inject: [ConfigService],
@@ -48,6 +59,24 @@ export class WeatherModule {
           logger.log(line);
         }
 
+        // How many recordings are behind the seam is the one fact that makes a
+        // mock run readable in the log (spec `weather-mock-data`, "Mock sources
+        // are the development default"). The stronger claim — that nothing
+        // reaches the network — is only made when every bound source is a
+        // recorded one, so a mixed configuration never reads as offline.
+        const recorded = result.ports.filter((port) =>
+          port.sourceId.startsWith(RECORDED_SOURCE_PREFIX),
+        );
+
+        if (recorded.length > 0) {
+          logger.log(
+            `${recordedFixtureCount()} recorded fixtures loaded` +
+              (recorded.length === result.ports.length
+                ? '; no source reaches the network'
+                : `; ${result.ports.length - recorded.length} capability(ies) still use a live source`),
+          );
+        }
+
         // Every bound port checks the request against its own declared limits
         // before anything leaves the process.
         return { ...result, ports: result.ports.map((port) => guardLimits(port)) };
@@ -60,6 +89,18 @@ export class WeatherModule {
       useFactory: (sources: BoundSources): SeriesPort => portOf(sources, capability),
     }));
 
+    const placeLookup: Provider = {
+      provide: PLACE_LOOKUP_PORT,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>): PlaceLookupPort => {
+        const lookup = bindPlaceLookup(config.get('WEATHER_PROVIDER', { infer: true }), lookups);
+
+        new Logger(WeatherModule.name).log(lookup.log);
+
+        return lookup.port;
+      },
+    };
+
     const router: Provider = {
       provide: SourceRouterService,
       inject: [BOUND_SOURCES],
@@ -68,9 +109,10 @@ export class WeatherModule {
 
     return {
       module: WeatherModule,
-      providers: [bound, ...capabilityPorts, router, MetricPlannerService],
+      providers: [bound, ...capabilityPorts, placeLookup, router, MetricPlannerService],
       exports: [
         ...CAPABILITIES.map((capability) => CAPABILITY_PORT_TOKENS[capability]),
+        PLACE_LOOKUP_PORT,
         SourceRouterService,
         MetricPlannerService,
       ],

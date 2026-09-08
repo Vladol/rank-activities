@@ -1,4 +1,9 @@
 import { CAPABILITIES, type Capability } from '../../domain/weather/metric';
+import {
+  RECORDED_CAPABILITY_SOURCES,
+  recordedPlaceLookupSource,
+} from './adapters/mock/recorded-sources';
+import type { PlaceLookupPort } from './ports/place-lookup.port';
 import type { SeriesPort } from './ports/series.port';
 
 /** Sources the configuration may name. Naming one is not the same as having it. */
@@ -8,10 +13,20 @@ export type WeatherSourceName = (typeof WEATHER_SOURCE_NAMES)[number];
 
 export type SourceFactory = () => SeriesPort;
 
+export type PlaceLookupFactory = () => PlaceLookupPort;
+
 /**
- * Which source implements which capability. Empty of real entries in this
- * change — it defines the seam; the recorded sources fill it in
- * `02-add-mock-weather-provider` and the live one in `06-add-open-meteo-source`.
+ * Place lookup is its own seam rather than a fourth capability, so it has its
+ * own registry, selected by `WEATHER_PROVIDER` alone: there is no per-capability
+ * override for something that is not a capability
+ * (design.md, Decision 8 of `01-add-weather-source-contract`).
+ */
+export type PlaceLookupRegistry = Readonly<Partial<Record<WeatherSourceName, PlaceLookupFactory>>>;
+
+/**
+ * Which source implements which capability. The recorded sources filled it in
+ * `02-add-mock-weather-provider`; the live one arrives in
+ * `06-add-open-meteo-source`.
  */
 export type SourceRegistry = Readonly<
   Partial<Record<WeatherSourceName, Readonly<Partial<Record<Capability, SourceFactory>>>>>
@@ -75,7 +90,8 @@ export function bindCapabilitySources(
     if (factory === undefined) {
       throw new Error(
         `Weather source "${name}" is configured for the ${capability} capability but is not implemented. ` +
-          'Configure a source that exists; the service does not substitute another one.',
+          'Configure a source that exists; the service does not substitute another one.' +
+          hintFor(name),
       );
     }
 
@@ -96,9 +112,49 @@ export function bindCapabilitySources(
 }
 
 /**
- * The sources this build actually has. Empty here on purpose: this change
- * defines the seam and the selection mechanism, and the recorded sources
- * (`02-add-mock-weather-provider`) and the live one (`06-add-open-meteo-source`)
- * register themselves by adding an entry.
+ * Binds the source that serves place lookup, or refuses to start, under the
+ * same rule as the capabilities: a name with no implementation is a failure,
+ * never a substitution.
  */
-export const IMPLEMENTED_SOURCES: SourceRegistry = {};
+export function bindPlaceLookup(
+  name: WeatherSourceName,
+  registry: PlaceLookupRegistry,
+): { readonly port: PlaceLookupPort; readonly log: string } {
+  const factory = registry[name];
+
+  if (factory === undefined) {
+    throw new Error(
+      `Weather source "${name}" is configured for place lookup but is not implemented. ` +
+        'Configure a source that exists; the service does not substitute another one.' +
+        hintFor(name),
+    );
+  }
+
+  return { port: factory(), log: `place lookup bound to source "${name}"` };
+}
+
+/**
+ * `record` is a declared name with no implementation: a live source that would
+ * write fixtures as a side effect. Until it exists, fixtures are recorded by
+ * the script, and the rejection says so rather than leaving the reader to
+ * guess what the value was for
+ * (proposal.md of `02-add-mock-weather-provider`, "Out of scope").
+ */
+function hintFor(name: WeatherSourceName): string {
+  return name === 'record'
+    ? ' Fixtures are recorded by scripts/record-fixture.ts; run it and use WEATHER_PROVIDER=mock.'
+    : '';
+}
+
+/**
+ * The sources this build actually has. The recorded ones are the development
+ * default; the live Open-Meteo client registers itself under "open-meteo" in
+ * `06-add-open-meteo-source`.
+ */
+export const IMPLEMENTED_SOURCES: SourceRegistry = {
+  mock: RECORDED_CAPABILITY_SOURCES,
+};
+
+export const IMPLEMENTED_PLACE_LOOKUPS: PlaceLookupRegistry = {
+  mock: recordedPlaceLookupSource,
+};
