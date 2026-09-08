@@ -96,4 +96,50 @@
 - [x] 5.1 Assert by test or lint rule that no file under `src/domain/scoring/` or
       `src/modules/` is named after an activity.
 - [x] 5.2 Run `npm run lint`, `npm test`, `npx tsc --noEmit` and paste the output.
-- [ ] 5.3 `/code-review` at level `high`, then `/opsx:archive`.
+- [x] 5.3 `/code-review` at level `high` — four faults found and fixed, see the notes
+      below. `/opsx:archive` is not run yet.
+
+## Notes from the implementation
+
+**Task 4.5, the fifth activity.** Kept as a test rather than added and deleted:
+`test/acceptance/a-fifth-activity.spec.ts` writes `kitesurfing.activity.json` into a
+copy of the seed directory, loads the catalogue from it and scores it on the Lisbon
+recording. It ranks, its wind curve is the inversion of every other activity's, and the
+four existing activities score identically with it present. Nothing under `src/` was
+touched to make that happen — which is the claim, and it now stays checked instead of
+being checked once.
+
+**Deviations from stage 5, both to avoid a second vocabulary.** Declarations name metrics
+by the dictionary's own codes (`snow_depth`, not `SNOW_DEPTH`) and units by the canonical
+ones (`degC`, `second`, `degree`, not `C`, `s`, `deg`). The document's shorthand would
+need a translation table, and the translation table is the thing that gets forgotten.
+`role: "gate"` and `gateFloor` are kept as the document wrote them; the specs' phrase for
+the same thing is "limiting feature".
+
+**Two additions to the registries of stage 4.** `MISSING_REQUIRED_METRIC` joins the reason
+registry: the `fail` policy owes a reason naming the metric, and `TOO_MANY_GAPS` is a
+different statement. `ratio` joins the canonical units as what `shareOfHours` answers in;
+no metric is carried in it.
+
+**The direction convention (stage 5 §4).** The formula printed there, `180 - angle`,
+contradicts both its own labels and its own acceptance criterion. The labels and the
+criterion agree with each other, so the angle itself is what ships, pinned by
+`test/acceptance/wind-wave-alignment.spec.ts` against the Lisbon recording.
+
+**Findings for a later change, none of them acted on here** (re-calibration is out of
+scope by the proposal):
+
+- The `london-rainy` recording is not a rainy week. Two of its seven days hold no
+  precipitation at all and on a third the rain fell overnight, leaving 7 of 13 daylight
+  hours wet. The reference case of stage 2 §12 ("indoor first every day") cannot be
+  asserted against it without asserting that a dry 20 °C day in London is a day for a
+  museum. The acceptance test checks the requirement on the day whose daylight hours are
+  wet, and checks the converse on the dry days. A recording over a genuinely wet week
+  would let the row be stated as written.
+- `wind_gusts_10m` carries `plausible: [0, 45]` from stage 5 §8, and the `storm-gusts`
+  recording holds 54.8 m/s. The range is only ever applied to declared thresholds, so
+  nothing is wrong today, but the bound is not physical as described.
+- `precipitation_hours` counts any hour with precipitation, while outdoor's `dryHours`
+  counts an hour under 0.1 mm as dry. On a drizzle day the two features read the same
+  weather oppositely. Both readings are deliberate — indoor reads the whole day, outdoor
+  the daylight window — but the pair is worth a look when the weights are next revisited.
