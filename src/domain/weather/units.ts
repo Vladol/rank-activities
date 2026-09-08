@@ -23,6 +23,9 @@ export const CANONICAL_UNITS = [
   'wmo_code',
   'boolean',
   'iso8601',
+  // Not a unit any metric is carried in: what `shareOfHours` produces when it
+  // collapses a day into a fraction (stage-five.md, section 3).
+  'ratio',
 ] as const;
 
 export type CanonicalUnit = (typeof CANONICAL_UNITS)[number];
