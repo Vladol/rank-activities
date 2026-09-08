@@ -21,6 +21,13 @@ export interface Provenance {
   readonly fetchedAt: string;
   readonly stale: boolean;
   readonly metrics: readonly MetricCode[];
+  /**
+   * The IANA zone the source put the axis on. It is the honest answer to
+   * "which time zone are these dates in?" for a request made by coordinates,
+   * where nothing but the source ever knew: we asked for `auto`, and this is
+   * what `auto` turned out to be (stage-three.md, section 2.2).
+   */
+  readonly timezone?: string;
 }
 
 /**

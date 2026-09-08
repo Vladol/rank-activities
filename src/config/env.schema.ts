@@ -30,12 +30,27 @@ export const envSchema = z.object({
   /** Default forecast horizon: past 7 days the ranking degrades into noise. */
   FORECAST_DAYS_DEFAULT: z.coerce.number().int().min(1).max(16).default(7),
 
+  /**
+   * The longest horizon a ranking request may ask for (FR-04 of
+   * docs/development-flow/stage-two.md). It is a product ceiling rather than
+   * the source's: an over-long request is refused here, before anything leaves
+   * the process, because the source's own rejection has been recorded saying
+   * something factually wrong (stage-three.md, section 2.3).
+   */
+  FORECAST_DAYS_MAX: z.coerce.number().int().min(1).max(16).default(7),
+
   /** Forecast cache TTL in seconds, aligned with the Open-Meteo refresh rate (section 2.2). */
   WEATHER_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
 
   DATABASE_URL: z.url().optional(),
   REDIS_URL: z.url().optional(),
-});
+})
+  // A default outside the range would make every horizon-less request fail,
+  // and it would fail at the first request rather than at the start.
+  .refine((env) => env.FORECAST_DAYS_DEFAULT <= env.FORECAST_DAYS_MAX, {
+    path: ['FORECAST_DAYS_DEFAULT'],
+    message: 'the default horizon cannot exceed FORECAST_DAYS_MAX',
+  });
 
 export type Env = z.infer<typeof envSchema>;
 

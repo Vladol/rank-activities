@@ -43,6 +43,18 @@ export function isReasonCode(value: string): value is ReasonCode {
   return Object.hasOwn(REASON, value);
 }
 
+/**
+ * Whether asking again may help. It is a property of the reason rather than of
+ * the moment: a source that is down may answer next time, and a day with too
+ * many holes will have the same holes tomorrow. Declared once here, so a
+ * result cannot claim one thing and the registry another.
+ */
+export function isRetryable(code: ReasonCode): boolean {
+  const entry = REASON[code] as { readonly retryable?: boolean };
+
+  return entry.retryable ?? false;
+}
+
 export function reasonsOfKind(kind: ReasonKind): ReasonCode[] {
   return (Object.keys(REASON) as ReasonCode[]).filter((code) => REASON[code].kind === kind);
 }

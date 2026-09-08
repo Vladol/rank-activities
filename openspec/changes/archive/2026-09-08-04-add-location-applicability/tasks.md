@@ -96,7 +96,8 @@
       6. `computedAt` was refreshed and the profile re-saved on every request. A request
          that changes nothing now returns the stored profile untouched.
       7. `allNullProbeDates` was documented as local dates while the code wrote UTC.
-- [ ] 6.4b `/opsx:archive`.
+- [x] 6.4b `/opsx:archive`. *Delta synced into `openspec/specs/location-applicability/spec.md`
+      (9 requirements, 26 scenarios); `openspec validate --all --strict` passes 11 of 11.*
 
 ## 7. Carried out of this change
 

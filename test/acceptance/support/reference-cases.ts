@@ -1,6 +1,7 @@
 import { metricRequirements } from '../../../src/domain/activity/metric-requirements';
 import type { ResolvedDefinition } from '../../../src/domain/activity/activity-definition';
 import type { ActivityOutcome } from '../../../src/domain/ranking/activity-outcome';
+import { type DayRanking, rankDay } from '../../../src/domain/ranking/rank';
 import { scoreActivity } from '../../../src/domain/scoring/scoring-engine';
 import { buildDayWindows } from '../../../src/domain/weather/day-window';
 import {
@@ -205,6 +206,42 @@ export function scoreOf(day: DayOutcomes, activity: string): number | undefined 
   const outcome = day.outcomes.get(activity);
 
   return outcome?.kind === 'ranked' ? outcome.score : undefined;
+}
+
+/**
+ * One reference case, scored and then ordered — what a day of the answer holds
+ * once `05-add-activity-ranking` has put the outcomes in order.
+ *
+ * Applicability is deliberately not folded in here. Whether surfing is
+ * possible at a place is settled by `test/acceptance/applicability.spec.ts`
+ * against the same recordings; what is under test here is the other half, the
+ * one this change owns: given that it is possible, what does the day say.
+ */
+export async function rankReferenceCase(name: string): Promise<readonly RankedReferenceDay[]> {
+  const days = await scoreReferenceCase(referenceCase(name));
+
+  return days.map((day) => ({
+    date: day.date,
+    ranking: rankDay(
+      [...day.outcomes].map(([activity, outcome]) => ({ activity, outcome })),
+    ),
+  }));
+}
+
+export interface RankedReferenceDay {
+  readonly date: string;
+  readonly ranking: DayRanking;
+}
+
+/** The activities of a day in the order they were ranked. */
+export function orderOf(day: RankedReferenceDay): readonly string[] {
+  return day.ranking.ranked.map((entry) => entry.activity);
+}
+
+export function outcomeOf(day: RankedReferenceDay, activity: string): ActivityOutcome | undefined {
+  return [...day.ranking.ranked, ...day.ranking.notRanked].find(
+    (entry) => entry.activity === activity,
+  )?.outcome;
 }
 
 export function referenceCase(name: string): ReferenceCase {

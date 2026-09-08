@@ -9,6 +9,7 @@ import { AppResolver } from './app.resolver';
 import { AppService } from './app.service';
 import { validateEnv } from './config/env.schema';
 import { ActivitiesModule } from './modules/activities/activities.module';
+import { ApiModule } from './modules/api/api.module';
 import { GeoModule } from './modules/geo/geo.module';
 import { HealthModule } from './modules/health/health.module';
 import { WeatherModule } from './modules/weather/weather.module';
@@ -38,6 +39,9 @@ import { WeatherModule } from './modules/weather/weather.module';
     // decides which activities are possible there before any weather is asked
     // for. The profile store is in-process until `08-add-data-persistence`.
     GeoModule,
+    // The scenario itself, and the GraphQL surface over it. The transport rules
+    // — error envelope, complexity limits, throttling — are `09-add-graphql-api`.
+    ApiModule,
   ],
   providers: [AppResolver, AppService],
 })

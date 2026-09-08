@@ -88,8 +88,10 @@ The target layout is described in flow.md §4.3. What exists today:
 ```
 src/config/        # zod environment schema, fail-fast at startup
 src/domain/        # pure core: metrics, units, series, Result, location identity and profiles
-src/modules/       # health, weather (ports, selection, adapters), activities, geo; then ranking, api
+src/modules/       # health, weather (ports, selection, adapters), activities, geo, ranking, api
 src/modules/geo/   # location resolver, applicability profile, marine probe, snow-season evidence
+src/modules/ranking/     # the use case: resolve -> applicability -> plan -> fetch -> score -> order
+src/modules/api/graphql/ # result models and the mapper; the only place a GraphQL decorator lives
 src/modules/weather/adapters/mock/       # recorded sources, fixture registry, rebaser, fixtures
 src/modules/weather/adapters/open-meteo/ # zod schema and raw->domain mapper, shared with the live client
 scripts/           # record-fixture.ts: the only supported way to add a fixture

@@ -157,6 +157,7 @@ export function mapOpenMeteoResponse(
           fetchedAt: context.fetchedAt,
           stale: context.stale ?? false,
           metrics,
+          timezone: response.timezone,
         },
       ],
     }),
