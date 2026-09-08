@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Lifetime } from '../../src/common/cache/freshness';
+import { type CachePort, NullCache } from '../../src/common/cache/cache.port';
 import { MemoryCache } from '../../src/common/cache/memory-cache.adapter';
-import { MetricsRegistry } from '../../src/common/metrics/metrics.registry';
+import { METRIC, MetricsRegistry } from '../../src/common/metrics/metrics.registry';
 import { domainError } from '../../src/domain/shared/domain-error';
 import { err } from '../../src/domain/shared/result';
 import type { Capability } from '../../src/domain/weather/metric';
@@ -40,7 +41,13 @@ const LIFETIMES: Readonly<Record<Capability, Lifetime>> = {
  * and nothing could satisfy: "previously obtained data" did not exist until
  * this change (`07`'s design.md, Context).
  */
-function cachedHarness(options: { readonly outage?: () => boolean } = {}) {
+function cachedHarness(
+  options: {
+    readonly outage?: () => boolean;
+    readonly adapter?: CachePort;
+    readonly budgetLimits?: { minute: number; hour: number; day: number };
+  } = {},
+) {
   let now = START;
   const metrics = new MetricsRegistry();
   const revalidations: Promise<void>[] = [];
@@ -51,15 +58,17 @@ function cachedHarness(options: { readonly outage?: () => boolean } = {}) {
       : recorded(),
   );
   const wrapping = {
-    cache: new MemoryCache({ maxEntries: 100, maxBytes: 2_000_000, now: () => now }),
+    cache:
+      options.adapter ?? new MemoryCache({ maxEntries: 100, maxBytes: 2_000_000, now: () => now }),
     lifetimes: LIFETIMES,
     placeLifetime: { ttlSeconds: 2_592_000, maxStaleSeconds: 2_592_000 },
     placeNegativeLifetime: { ttlSeconds: 300, maxStaleSeconds: 300 },
     maxForecastDays: 7,
     resilience: {
       budget: new OutboundBudgetService({
-        limits: { minute: 600, hour: 5_000, day: 10_000 },
+        limits: options.budgetLimits ?? { minute: 600, hour: 5_000, day: 10_000 },
         now: () => now,
+        metrics,
       }),
       maxAttempts: 1,
       backoff: { initialDelayMs: 0, maxDelayMs: 0 },
@@ -128,16 +137,40 @@ describe('stale data is delivered as stale, not as an error', () => {
   });
 
   it('takes the staleness and the moment from this layer and from nowhere else', async () => {
-    const { harness } = cachedHarness();
-    const answer = await harness.service.rank({ location: LISBON, days: 1 });
+    let down = false;
+    const { harness, advance } = cachedHarness({ outage: () => down });
+    const fresh = await harness.service.rank({ location: LISBON, days: 1 });
 
-    // Every ingredient declares its own provenance, and the answer reports the
-    // oldest of them: staleness is not a flag the use case sets.
-    const provenance = answer.ok ? answer.value.days.length > 0 : false;
+    down = true;
+    advance(HOUR);
+    const stale = await harness.service.rank({ location: LISBON, days: 1 });
 
-    expect(provenance).toBe(true);
-    expect(answer.ok && answer.value.stale).toBe(false);
-    expect(answer.ok && answer.value.fetchedAt).not.toBeNull();
+    // The moment is the one the source answered at, carried on the provenance
+    // through the cache — not the moment this answer was assembled, which is
+    // an hour later and would make a stale answer look current.
+    expect(stale.ok && stale.value.fetchedAt).toBe(fresh.ok ? fresh.value.fetchedAt : 'differs');
+
+    advance(HOUR);
+    const later = await harness.service.rank({ location: LISBON, days: 1 });
+
+    // Two hours on, still the same moment: the field tracks the data, not the
+    // request that asked for it.
+    expect(later.ok && later.value.fetchedAt).toBe(fresh.ok ? fresh.value.fetchedAt : 'differs');
+    expect(later.ok && later.value.stale).toBe(true);
+  });
+
+  it('never invents staleness when there is no cache to be stale', async () => {
+    // With the `null` adapter every request is a miss, so nothing can be old.
+    // Staleness is a fact the cache states and the use case relays; the use
+    // case has no other way to arrive at one.
+    const { harness, advance } = cachedHarness({ adapter: new NullCache() });
+
+    await harness.service.rank({ location: LISBON, days: 1 });
+    advance(4 * HOUR);
+    const later = await harness.service.rank({ location: LISBON, days: 1 });
+
+    expect(later.ok && later.value.stale).toBe(false);
+    expect(later.ok && later.value.fetchedAt).not.toBeNull();
   });
 
   it('goes back to fresh once the source answers again', async () => {
@@ -171,5 +204,47 @@ describe('stale data is delivered as stale, not as an error', () => {
     await harness.service.rank(request);
 
     expect(forecast.requests).toHaveLength(afterFirst);
+  });
+});
+
+describe('an exhausted budget is refused with a reason, never queued', () => {
+  it('answers the affected activities as missing data with a retryable busy reason', async () => {
+    // One unit for the whole minute: the profile's own probes spend it, and
+    // the forecast then finds nothing left.
+    const { harness, metrics } = cachedHarness({
+      adapter: new NullCache(),
+      budgetLimits: { minute: 1, hour: 5_000, day: 10_000 },
+    });
+
+    const started = Date.now();
+    const answer = await harness.service.rank({ location: LISBON, days: 1 });
+
+    expect(answer.ok).toBe(true);
+
+    const outcomes = answer.ok
+      ? [
+          ...answer.value.days.flatMap((day) => [
+            ...day.ranking.ranked,
+            ...day.ranking.notRanked,
+          ]),
+          ...answer.value.undated,
+        ].map((entry) => entry.outcome)
+      : [];
+    const busy = outcomes.filter(
+      (outcome) => outcome.kind === 'no_data' && outcome.reason === 'PROVIDER_BUSY',
+    );
+
+    expect(busy.length).toBeGreaterThan(0);
+    expect(busy.every((outcome) => outcome.kind === 'no_data' && outcome.retryable)).toBe(true);
+    // Answered rather than held: a queue would turn an exhausted quota into a
+    // rising p95, which is an outage disguised as slowness.
+    expect(Date.now() - started).toBeLessThan(1_000);
+    // And it is visible as a counted outcome rather than only as a slow answer.
+    const shed = metrics
+      .snapshot()
+      .filter((sample) => sample.name === METRIC.budgetShed)
+      .reduce((total, sample) => total + sample.value, 0);
+
+    expect(shed).toBeGreaterThan(0);
   });
 });

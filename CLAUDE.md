@@ -53,7 +53,14 @@ npx tsc --noEmit                 # types
   [docs/requirements/mocking.md](docs/requirements/mocking.md).
 - **The environment is validated at startup** (`src/config/env.schema.ts`). A new
   variable means editing the schema and `.env.example`, not reading
-  `process.env.X` in place.
+  `process.env.X` in place. A variable missing from `.env.example` fails a test.
+- **Cache keys are built only in `src/common/cache/cache-keys.ts`.** `CachePort`
+  takes a branded `CacheKey`, so the compiler enforces it; only plain data is
+  cached, through an explicit codec per type, and every codec has a round-trip
+  test in which a `null` inside a series stays `null`.
+- **Cross-cutting behaviour is never written into an adapter.** Cache,
+  deduplication, breaker, retry, budget and metrics come from one factory
+  (`src/modules/weather/decorators/wrap-source.ts`), in the order stage 4 fixed.
 - `noUncheckedIndexedAccess` is on: indexing an hourly series guarantees nothing,
   and Open-Meteo routinely returns `null` inside its series.
 
@@ -86,12 +93,16 @@ requires behaviour whose mechanism arrives later.
 The target layout is described in flow.md §4.3. What exists today:
 
 ```
-src/config/        # zod environment schema, fail-fast at startup
+src/config/        # zod environment schema, fail-fast at startup; caching and budget settings
+src/common/cache/  # CachePort, memory and null adapters, cache-keys.ts, codecs, single-flight
+src/common/metrics/# the counter and gauge registry; Prometheus exports it in stage 7
 src/domain/        # pure core: metrics, units, series, Result, location identity and profiles
 src/modules/       # health, weather (ports, selection, adapters), activities, geo, ranking, api
 src/modules/geo/   # location resolver, applicability profile, marine probe, snow-season evidence
 src/modules/ranking/     # the use case: resolve -> applicability -> plan -> fetch -> score -> order
 src/modules/api/graphql/ # result models and the mapper; the only place a GraphQL decorator lives
+src/modules/weather/decorators/          # the one wrapping factory: observed, cached, resilient
+src/modules/weather/outbound-budget/     # token buckets over three windows, counted in attempts
 src/modules/weather/adapters/mock/       # recorded sources, fixture registry, rebaser, fixtures
 src/modules/weather/adapters/open-meteo/ # zod schema and raw->domain mapper, shared with the live client
 scripts/           # record-fixture.ts: the only supported way to add a fixture

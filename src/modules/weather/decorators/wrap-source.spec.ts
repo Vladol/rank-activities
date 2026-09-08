@@ -34,6 +34,7 @@ function harness() {
   const budget = new OutboundBudgetService({
     limits: { minute: 600, hour: 5_000, day: 10_000 },
     now: () => now,
+    metrics,
   });
   const inner = stubPort('forecast', { sourceId: 'open-meteo-forecast' });
   const options: SourceWrappingOptions = {
@@ -137,6 +138,32 @@ describe('the wrapping order', () => {
 
     expect(metrics.read(METRIC.cacheOperations, { ...label, outcome: 'miss' })).toBe(1);
     expect(metrics.read(METRIC.cacheOperations, { ...label, outcome: 'hit' })).toBe(1);
+  });
+
+  it('keeps every number ADR 0004 asks for', async () => {
+    const { inner, port, metrics, advance } = harness();
+
+    // One of each: a miss, a hit, a stale serve, a join and a breaker reading.
+    await port.fetch(REQUEST);
+    await port.fetch(REQUEST);
+    advance(3_600_000);
+    inner.answer = () => Promise.resolve(err(domainError('TIMEOUT', 'no answer')));
+    await port.fetch(REQUEST);
+
+    const recorded = new Set(metrics.snapshot().map((sample) => sample.name));
+
+    expect([...recorded].toSorted()).toEqual(
+      [
+        METRIC.breakerState,
+        METRIC.budgetRemaining,
+        METRIC.cacheOperations,
+        METRIC.outboundAttempts,
+        OBSERVED.durationCount,
+        OBSERVED.durationSum,
+        OBSERVED.outcomes,
+      ].toSorted(),
+    );
+    expect(metrics.read(METRIC.budgetRemaining, { window: 'day' })).toBeLessThan(10_000);
   });
 
   it('keeps the source contract: id, capability, limits and support pass through', () => {

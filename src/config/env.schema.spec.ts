@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { validateEnv } from './env.schema';
+import { ENV_KEYS, validateEnv } from './env.schema';
 
 describe('validateEnv', () => {
   it('applies defaults when nothing is set', () => {
@@ -49,5 +51,17 @@ describe('validateEnv', () => {
 
   it('rejects a malformed DATABASE_URL', () => {
     expect(() => validateEnv({ DATABASE_URL: 'not-a-url' })).toThrow(/DATABASE_URL/);
+  });
+
+  it('documents every variable it declares in .env.example', () => {
+    // "A new variable means editing the schema and .env.example" (CLAUDE.md).
+    // A rule that is only written down is a rule that is only sometimes
+    // followed; this is the same rule, checked.
+    const example = readFileSync(join(process.cwd(), '.env.example'), 'utf8');
+    const undocumented = ENV_KEYS.filter(
+      (key) => !new RegExp(`^#?\\s*${key}=`, 'mu').test(example),
+    );
+
+    expect(undocumented).toEqual([]);
   });
 });
