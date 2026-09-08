@@ -49,27 +49,27 @@
 
 ## 3. Scoring engine stages
 
-- [ ] 3.1 Write failing tests, then add feature extraction: declaration + series + day
+- [x] 3.1 Write failing tests, then add feature extraction: declaration + series + day
       window → aggregated values with sample and missing counts.
-- [ ] 3.2 Add null-policy handling; test `degrade`, `exclude` with weight redistribution,
+- [x] 3.2 Add null-policy handling; test `degrade`, `exclude` with weight redistribution,
       and `fail` producing missing data naming the metric.
-- [ ] 3.3 Test the excess-gaps rule: a partially-covered required metric above the
+- [x] 3.3 Test the excess-gaps rule: a partially-covered required metric above the
       threshold makes that one day missing data while the other six are scored, and a
       metric absent for the whole day is left to the null policy instead (the ERA5
       `visibility` fixture must still score).
-- [ ] 3.4 Add constraint evaluation; test that a fired constraint yields zero with its
+- [x] 3.4 Add constraint evaluation; test that a fired constraint yields zero with its
       reason, that the first declared constraint wins when two fire, that a constraint does
       not fire on an absent value, and that a fired constraint outranks a missing
       `fail`-policy feature.
-- [ ] 3.5 Add normalisation, weighting and combination, including limiting features as
+- [x] 3.5 Add normalisation, weighting and combination, including limiting features as
       factors with their declared lower limit; test that the emitted contributions and
       factors reproduce the score before bounds, and that a limiting feature at its maximum
       changes nothing.
-- [ ] 3.6 Add bounds; test the floor, the ceiling, and that a constraint-driven zero
+- [x] 3.6 Add bounds; test the floor, the ceiling, and that a constraint-driven zero
       ignores the floor.
-- [ ] 3.7 Add the scoring profile with identity and version; test that the same declaration
+- [x] 3.7 Add the scoring profile with identity and version; test that the same declaration
       under two profiles yields two results each naming its profile.
-- [ ] 3.8 Test determinism: two evaluations of the same inputs are identical, explanation
+- [x] 3.8 Test determinism: two evaluations of the same inputs are identical, explanation
       ordering included.
 - [ ] 3.9 Reproduce the two reference cases that motivated limiting features: "Dubai, +45 °C
       and clear" and "London, rain all week" must both rank indoor above outdoor with one
